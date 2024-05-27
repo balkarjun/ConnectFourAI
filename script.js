@@ -45,18 +45,24 @@ const radius = cellWidth/2;
 let moves = [];
 let nextColIndex = -1;
 let heights = [0, 0, 0, 0, 0, 0, 0];
+let gameOver = false;
 
 canvas.addEventListener("mousemove", (event) => {
+    if (gameOver) return;
     const rect = canvas.getBoundingClientRect();
     nextColIndex = Math.floor((event.clientX - rect.left) / cellWidth);
 });
 
-canvas.addEventListener("click", (event) => {
-    if (heights[nextColIndex] >= nrows) return;
-    
+canvas.addEventListener("click", makeMove);
+
+// makes a move at the nextColIndex
+function makeMove() {
+    // ensure the move is valid
+    if (gameOver || heights[nextColIndex] >= nrows) return;
+
     moves.push(nextColIndex);
     heights[nextColIndex]++;
-});
+}
 
 function drawGrid() {
     ctx.fillStyle = boardFg;
@@ -123,3 +129,55 @@ function draw(timeStamp) {
 
 // request the first frame
 window.requestAnimationFrame(draw);
+
+/* WebAssembly */
+
+// allocate memory for moves array
+let memory = new WebAssembly.Memory({
+    initial: 1, // value in page sizes (1 page = 64 KiB)
+    maximum: 1
+});
+
+let core;
+WebAssembly.instantiateStreaming(fetch('main.wasm'), {
+    js: { mem: memory }
+}).then(results => {
+    core = results.instance.exports;
+    memory = results.instance.exports.memory; // update memory pointer
+});
+
+let moveInterval;
+
+function play() {
+    moveInterval = setInterval(getMinimaxMove, 100);
+}
+
+function getMinimaxMove() {
+    const array = new Uint32Array(memory.buffer);
+    for (let i = 0; i < moves.length; i++) {
+        array[i] = moves[i];
+    }
+    
+    nextColIndex = core.getMinimaxMove(0, moves.length, 7);
+    makeMove();
+    console.log(getEvaluations());
+    if (endStateReached()) {
+        gameOver = true;
+        nextColIndex = -1;
+        clearInterval(moveInterval);
+    }
+}
+// @Todo: Refactor into the getMinimaxMove function
+function endStateReached() {
+    const array = new Uint32Array(memory.buffer);
+    for (let i = 0; i < moves.length; i++) {
+        array[i] = moves[i];
+    }
+
+    const result = core.endStateReached(0, moves.length);
+    return result != -1;
+}
+
+function getEvaluations() {
+    return core.getEvaluations();
+}
