@@ -1,6 +1,12 @@
-#include <stdio.h>
+#define TARGET_WASM 1
+
+#if !TARGET_WASM
+    #include <stdio.h>
+    #include <time.h>
+#endif
+
 #include <stdint.h>
-#include <time.h>
+#include <emscripten.h>
 
 typedef uint64_t u64;
 /*
@@ -96,7 +102,7 @@ struct GameState {
         
         return score;
     }
-
+#if !TARGET_WASM
     void display() {
         for (int irow = nrows - 1; irow >= 0; irow--) {
             printf("\n ");
@@ -110,6 +116,7 @@ struct GameState {
         }
         printf("\n 1 2 3 4 5 6 7\n\n");
     }
+#endif
 };
 
 int minimax(GameState &board, int alpha, int beta, int depth) {
@@ -161,6 +168,7 @@ int get_minimax_move(GameState &board, int depth) {
     return best_move;
 }
 
+#if !TARGET_WASM
 int main() {
     GameState board;
     int depths[2] = {8, 8};
@@ -194,3 +202,18 @@ int main() {
         printf("Black (○) Won!\n");
     }
 }
+#endif
+
+#if TARGET_WASM
+extern "C" {
+    EMSCRIPTEN_KEEPALIVE 
+    int getMinimaxMove(int *moves, int length, int depth) {
+        GameState board;
+        for (int i = 0; i < length; i++) {
+            board.make_move(moves[i]);
+        }
+
+        return get_minimax_move(board, depth);
+    }
+}
+#endif
