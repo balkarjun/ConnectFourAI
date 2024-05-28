@@ -42,15 +42,28 @@ let heights = [0, 0, 0, 0, 0, 0, 0];
 let isPlaying = false;
 let humanMove = -1;
 
+let evaluations = [];
+let elapsedTime = [];
+
 function reset() {
     moves = [];
     heights = [0, 0, 0, 0, 0, 0, 0];
     isPlaying = false;
     humanMove = -1;
+
+    evaluations = [];
+    elapsedTime = [];
+    clearStatTable();
 }
 
 function play() {
     isPlaying = true;
+
+    if (agentSelect[0].value == 'human' && agentSelect[1].value == 'human') {
+        document.getElementById('stat-table').classList.add('hidden');
+    } else {
+        document.getElementById('stat-table').classList.remove('hidden');
+    }
 }
 
 canvas.addEventListener("click", event => {
@@ -225,12 +238,60 @@ function update() {
     const agent = agentSelect[moves.length & 1].value;
     const depth = Number(depthInput[moves.length & 1].value);
     if (agent == 'minimax') {
+        const startTime = performance.now();
         const move = getMinimaxMove(depth);
+        const endTime = performance.now();
+
         makeMove(move);
+
+        evaluations.push(getEvaluations());
+        elapsedTime.push(endTime - startTime);
+
+        updateStatTable();
     } else if (agent == 'human' && humanMove != -1) {
         makeMove(humanMove);
         humanMove = -1;
     }
+}
+
+function updateStatTable() {
+    const formatter = Intl.NumberFormat('en');
+    
+    // current
+    const currentEval = evaluations[evaluations.length - 1];  
+    const currentTime = elapsedTime[elapsedTime.length - 1];
+    const currentRate = (currentTime < 1) ? currentEval : (currentEval / currentTime);
+
+    const current = document.querySelectorAll('#stat-current td');
+    current[0].innerText = formatter.format(Math.round(currentEval));
+    current[1].innerText = formatter.format(Math.round(currentTime));
+    current[2].innerText = formatter.format(Math.round(currentRate));
+
+    // total
+    const totalEval = evaluations.reduce((a, b) => a + b, 0);
+    const totalTime = elapsedTime.reduce((a, b) => a + b, 0);
+    const totalRate = (totalTime < 1) ? totalEval : (totalEval / totalTime);
+
+    const total = document.querySelectorAll('#stat-total td');
+    total[0].innerText = formatter.format(Math.round(totalEval));
+    total[1].innerText = formatter.format(Math.round(totalTime));
+    total[2].innerText = formatter.format(Math.round(totalRate));
+
+    // average
+    const avgEval = totalEval / evaluations.length;
+    const avgTime = totalTime / elapsedTime.length;
+    const avgRate = (avgTime < 1) ? avgEval : (avgEval / avgTime);
+
+    const average = document.querySelectorAll('#stat-average td');
+    average[0].innerText = formatter.format(Math.round(avgEval));
+    average[1].innerText = formatter.format(Math.round(avgTime));
+    average[2].innerText = formatter.format(Math.round(avgRate));
+}
+
+function clearStatTable() {
+    document.querySelectorAll('tbody td').forEach(item => {
+        item.innerText = '';
+    });
 }
 
 function draw() {
@@ -252,7 +313,7 @@ function draw() {
     // indicate winning token
     hcols = [0, 0, 0, 0, 0, 0, 0];
     if (!isPlaying && moves.length > 0) {
-        board = [
+        let board = [
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
