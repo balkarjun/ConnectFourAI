@@ -45,23 +45,37 @@ const radius = cellWidth/2;
 let moves = [];
 let nextColIndex = -1;
 let heights = [0, 0, 0, 0, 0, 0, 0];
-let gameOver = false;
+let isPlaying = false;
+let humanMoveMade = false;
+
+function reset() {
+    moves = [];
+    nextColIndex = -1;
+    heights = [0, 0, 0, 0, 0, 0, 0];
+    isPlaying = false;
+    humanMoveMade = false;
+}
+
+function play() {
+    isPlaying = true;
+}
 
 canvas.addEventListener("mousemove", (event) => {
-    if (gameOver) return;
+    if (!isPlaying) return;
     const rect = canvas.getBoundingClientRect();
     nextColIndex = Math.floor((event.clientX - rect.left) / cellWidth);
 });
 
-canvas.addEventListener("click", makeMove);
+canvas.addEventListener("click", function() {
+    humanMoveMade = true;
+});
 
-// makes a move at the nextColIndex
-function makeMove() {
+function makeMove(icol) {
     // ensure the move is valid
-    if (gameOver || heights[nextColIndex] >= nrows) return;
+    if (!isPlaying || heights[icol] >= nrows) return;
 
-    moves.push(nextColIndex);
-    heights[nextColIndex]++;
+    moves.push(icol);
+    heights[icol]++;
 }
 
 function drawGrid() {
@@ -104,7 +118,120 @@ function drawCoin(fillStyle, strokeStyle, irow, icol) {
     ctx.closePath();
 }
 
-function draw(timeStamp) {
+/* WASM START */
+// allocate memory for moves array
+let memory = new WebAssembly.Memory({
+    initial: 1, // value in page sizes (1 page = 64 KiB)
+    maximum: 1
+});
+
+let core;
+WebAssembly.instantiateStreaming(fetch('main.wasm'), {
+    js: { mem: memory }
+}).then(results => {
+    core = results.instance.exports;
+    memory = results.instance.exports.memory; // update memory pointer
+});
+
+function getMinimaxMove(depth) {
+    const array = new Uint32Array(memory.buffer);
+    for (let i = 0; i < moves.length; i++) {
+        array[i] = moves[i];
+    }
+    
+    return core.getMinimaxMove(0, moves.length, depth);
+}
+
+function endStateReached() {
+    const array = new Uint32Array(memory.buffer);
+    for (let i = 0; i < moves.length; i++) {
+        array[i] = moves[i];
+    }
+
+    const result = core.endStateReached(0, moves.length);
+
+    if (result == 0) {
+        console.log('Tie');
+    } else if (result > 0) {
+        console.log('Red Won');
+    } else if (result != -1) {
+        console.log('Yellow Won');
+    }
+    return result != -1;
+}
+
+function getEvaluations() {
+    return core.getEvaluations();
+}
+/* WASM END */
+
+/* UI Controls START */
+const agentSelect = [
+    document.getElementById('player-one-select'),
+    document.getElementById('player-two-select')
+];
+
+const depthInput = [
+    document.getElementById('player-one-depth-input'),
+    document.getElementById('player-two-depth-input')
+];
+
+const depthLabel = [
+    document.getElementById('player-one-depth-label'),
+    document.getElementById('player-two-depth-label')
+];
+
+for (let p = 0; p <= 1; p++) {
+    agentSelect[p].addEventListener('change', function() {
+        // show depth picker if minimax
+        if (this.value == 'minimax') {
+            depthInput[p].classList.remove('hidden');
+            depthLabel[p].innerText = depthInput[p].value;
+        } else {
+            depthInput[p].classList.add('hidden');
+            depthLabel[p].innerText = '';
+        }
+    });
+
+    // update the depth picker's label as its value changes
+    depthInput[p].oninput = function() {
+        depthLabel[p].innerText = depthInput[p].value;
+    }
+}
+/* UI Controls END */
+
+/* Game Loop */
+
+// request the first frame
+window.requestAnimationFrame(gameLoop);
+function gameLoop(timeStamp) {
+    update();
+    draw();
+
+    // request the next frame
+    window.requestAnimationFrame(gameLoop);
+}
+
+function update() {
+    if (!isPlaying) return;
+    if (endStateReached()) {
+        isPlaying = false;
+        nextColIndex = -1;
+        return;
+    }
+
+    const agent = agentSelect[moves.length & 1].value;
+    const depth = Number(depthInput[moves.length & 1].value);
+    if (agent == 'minimax') {
+        nextColIndex = getMinimaxMove(depth);
+        makeMove(nextColIndex);
+    } else if (agent == 'human' && humanMoveMade) {
+        makeMove(nextColIndex);
+        humanMoveMade = false;
+    }
+}
+
+function draw() {
     drawGrid();
 
     // draw current state of board
@@ -122,62 +249,4 @@ function draw(timeStamp) {
     // highlight next move
     const strokeColor = (moves.length % 2 == 0) ? coinRedBorderSubtle : coinYellowBorderSubtle;
     if (nextColIndex != -1) drawCoin(boardBg, strokeColor, nrows - heights[nextColIndex] - 1, nextColIndex);
-
-    // request the next frame
-    window.requestAnimationFrame(draw);
-}
-
-// request the first frame
-window.requestAnimationFrame(draw);
-
-/* WebAssembly */
-
-// allocate memory for moves array
-let memory = new WebAssembly.Memory({
-    initial: 1, // value in page sizes (1 page = 64 KiB)
-    maximum: 1
-});
-
-let core;
-WebAssembly.instantiateStreaming(fetch('main.wasm'), {
-    js: { mem: memory }
-}).then(results => {
-    core = results.instance.exports;
-    memory = results.instance.exports.memory; // update memory pointer
-});
-
-let moveInterval;
-
-function play() {
-    moveInterval = setInterval(getMinimaxMove, 100);
-}
-
-function getMinimaxMove() {
-    const array = new Uint32Array(memory.buffer);
-    for (let i = 0; i < moves.length; i++) {
-        array[i] = moves[i];
-    }
-    
-    nextColIndex = core.getMinimaxMove(0, moves.length, 7);
-    makeMove();
-    console.log(getEvaluations());
-    if (endStateReached()) {
-        gameOver = true;
-        nextColIndex = -1;
-        clearInterval(moveInterval);
-    }
-}
-// @Todo: Refactor into the getMinimaxMove function
-function endStateReached() {
-    const array = new Uint32Array(memory.buffer);
-    for (let i = 0; i < moves.length; i++) {
-        array[i] = moves[i];
-    }
-
-    const result = core.endStateReached(0, moves.length);
-    return result != -1;
-}
-
-function getEvaluations() {
-    return core.getEvaluations();
 }
