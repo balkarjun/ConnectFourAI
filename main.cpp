@@ -37,6 +37,8 @@ const int scoremap[] = {
     3, 4,  5,  5, 4, 3, 0
 };
 
+int evaluations = 0;
+
 struct GameState {
     u64 bitboards[2] = {0, 0};
     // number of moves made
@@ -102,6 +104,7 @@ struct GameState {
         
         return score;
     }
+
 #if !TARGET_WASM
     void display() {
         for (int irow = nrows - 1; irow >= 0; irow--) {
@@ -121,8 +124,14 @@ struct GameState {
 
 int minimax(GameState &board, int alpha, int beta, int depth) {
     int score = board.end_state_reached();
-    if (score != -1) return score;
-    if (depth ==  0) return board.evaluate();
+    if (score != -1) {
+        evaluations++;
+        return score;
+    }
+    if (depth == 0) {
+        evaluations++;
+        return board.evaluate();
+    }
 
     int sign = 1 - 2 * (board.counter & 1); // 1 if white, -1 if black
 
@@ -142,6 +151,7 @@ int minimax(GameState &board, int alpha, int beta, int depth) {
 }
 
 int get_minimax_move(GameState &board, int depth) {
+    evaluations = 0;
     // +inf for black (1), -inf for white (0)
     int alpha = (board.counter & 1) ? 1000000 : -1000000;
     int beta  = -alpha;
@@ -214,6 +224,21 @@ extern "C" {
         }
 
         return get_minimax_move(board, depth);
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    int endStateReached(int *moves, int length) {
+        GameState board;
+        for (int i = 0; i < length; i++) {
+            board.make_move(moves[i]);
+        }
+
+        return board.end_state_reached();
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    int getEvaluations() {
+        return evaluations;
     }
 }
 #endif
