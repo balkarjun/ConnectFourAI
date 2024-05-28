@@ -31,43 +31,32 @@ const boardBg = "#eef7ff";
 const coinRed = "#ce5454";
 const coinYellow = "#dfc352";
 
-const coinRedSubtle = "#e6a9a9";
-const coinYellowSubtle = "#efe1a8";
-
 const coinRedBorder = "#b94343";
 const coinYellowBorder = "#c3a343";
 
-const coinRedBorderSubtle = "#d79191";
-const coinYellowBorderSubtle = "#dbc88e";
 const radius = cellWidth/2;
 
 // store indices of columns where coins were placed
 let moves = [];
-let nextColIndex = -1;
 let heights = [0, 0, 0, 0, 0, 0, 0];
 let isPlaying = false;
-let humanMoveMade = false;
+let humanMove = -1;
 
 function reset() {
     moves = [];
-    nextColIndex = -1;
     heights = [0, 0, 0, 0, 0, 0, 0];
     isPlaying = false;
-    humanMoveMade = false;
+    humanMove = -1;
 }
 
 function play() {
     isPlaying = true;
 }
 
-canvas.addEventListener("mousemove", (event) => {
+canvas.addEventListener("click", event => {
     if (!isPlaying) return;
     const rect = canvas.getBoundingClientRect();
-    nextColIndex = Math.floor((event.clientX - rect.left) / cellWidth);
-});
-
-canvas.addEventListener("click", function() {
-    humanMoveMade = true;
+    humanMove = Math.floor((event.clientX - rect.left) / cellWidth);
 });
 
 function makeMove(icol) {
@@ -114,6 +103,20 @@ function drawCoin(fillStyle, strokeStyle, irow, icol) {
     ctx.arc(coinX, coinY, radius - 2*lineWidth, 0, 2 * Math.PI);
 
     ctx.fill();
+    ctx.stroke();
+    ctx.closePath();
+}
+
+function drawSmallCoin(strokeStyle, irow, icol) {
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = lineWidth*2;
+
+    ctx.beginPath();
+    const coinX = (icol + 1)* cellWidth - radius + lineWidth/2;
+    const coinY = (irow + 1)* cellHeight - radius + lineWidth/2;
+
+    ctx.arc(coinX, coinY, cellWidth/4, 0, 2 * Math.PI);
+
     ctx.stroke();
     ctx.closePath();
 }
@@ -216,18 +219,17 @@ function update() {
     if (!isPlaying) return;
     if (endStateReached()) {
         isPlaying = false;
-        nextColIndex = -1;
         return;
     }
 
     const agent = agentSelect[moves.length & 1].value;
     const depth = Number(depthInput[moves.length & 1].value);
     if (agent == 'minimax') {
-        nextColIndex = getMinimaxMove(depth);
-        makeMove(nextColIndex);
-    } else if (agent == 'human' && humanMoveMade) {
-        makeMove(nextColIndex);
-        humanMoveMade = false;
+        const move = getMinimaxMove(depth);
+        makeMove(move);
+    } else if (agent == 'human' && humanMove != -1) {
+        makeMove(humanMove);
+        humanMove = -1;
     }
 }
 
@@ -238,15 +240,92 @@ function draw() {
     let hcols = [0, 0, 0, 0, 0, 0, 0];
     for (let counter = 0; counter < moves.length; counter++) {
         const icol = moves[counter];
+        const irow = nrows - hcols[icol] - 1;
 
         const fillColor = (counter % 2 == 0) ? coinRed : coinYellow;
         const strokeColor = (counter % 2 == 0) ? coinRedBorder : coinYellowBorder;
 
-        drawCoin(fillColor, strokeColor, nrows - hcols[icol] - 1, icol);
+        drawCoin(fillColor, strokeColor, irow, icol);
         hcols[icol]++;
     }
 
-    // highlight next move
-    const strokeColor = (moves.length % 2 == 0) ? coinRedBorderSubtle : coinYellowBorderSubtle;
-    if (nextColIndex != -1) drawCoin(boardBg, strokeColor, nrows - heights[nextColIndex] - 1, nextColIndex);
+    // indicate winning token
+    hcols = [0, 0, 0, 0, 0, 0, 0];
+    if (!isPlaying && moves.length > 0) {
+        board = [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0]
+        ];
+        for (let counter = 0; counter < moves.length; counter++) {
+            const icol = moves[counter];
+            const irow = nrows - hcols[icol] - 1;
+            board[irow][icol] = (counter & 1) + 1;
+            hcols[icol]++;
+        }
+
+        // horizontal
+        for (let irow = 0; irow < nrows; irow++) {
+            for (let icol = 0; icol < ncols - 3; icol++) {
+                if ((board[irow][icol] != 0) && 
+                    (board[irow][icol] == board[irow][icol + 1]) &&
+                    (board[irow][icol] == board[irow][icol + 2]) &&
+                    (board[irow][icol] == board[irow][icol + 3])
+                ) {
+                    drawSmallCoin("white", irow, icol);
+                    drawSmallCoin("white", irow, icol + 1);
+                    drawSmallCoin("white", irow, icol + 2);
+                    drawSmallCoin("white", irow, icol + 3);
+                }
+            }
+        }
+        // vertical
+        for (let irow = 0; irow < nrows - 3; irow++) {
+            for (let icol = 0; icol < ncols; icol++) {
+                if ((board[irow][icol] != 0) && 
+                    (board[irow][icol] == board[irow + 1][icol]) &&
+                    (board[irow][icol] == board[irow + 2][icol]) &&
+                    (board[irow][icol] == board[irow + 3][icol])
+                ) {
+                    drawSmallCoin("white", irow, icol);
+                    drawSmallCoin("white", irow + 1, icol);
+                    drawSmallCoin("white", irow + 2, icol);
+                    drawSmallCoin("white", irow + 3, icol);
+                }
+            }
+        }
+        // positive diagonal
+        for (let irow = 0; irow < nrows - 3; irow++) {
+            for (let icol = 3; icol < ncols; icol++) {
+                if ((board[irow][icol] != 0) && 
+                    (board[irow][icol] == board[irow + 1][icol - 1]) &&
+                    (board[irow][icol] == board[irow + 2][icol - 2]) &&
+                    (board[irow][icol] == board[irow + 3][icol - 3])
+                ) {
+                    drawSmallCoin("white", irow, icol);
+                    drawSmallCoin("white", irow + 1, icol - 1);
+                    drawSmallCoin("white", irow + 2, icol - 2);
+                    drawSmallCoin("white", irow + 3, icol - 3);
+                }
+            }
+        }
+        // negative diagonal
+        for (let irow = 0; irow < nrows - 3; irow++) {
+            for (let icol = 0; icol < ncols - 3; icol++) {
+                if ((board[irow][icol] != 0) && 
+                    (board[irow][icol] == board[irow + 1][icol + 1]) &&
+                    (board[irow][icol] == board[irow + 2][icol + 2]) &&
+                    (board[irow][icol] == board[irow + 3][icol + 3])
+                ) {
+                    drawSmallCoin("white", irow, icol);
+                    drawSmallCoin("white", irow + 1, icol + 1);
+                    drawSmallCoin("white", irow + 2, icol + 2);
+                    drawSmallCoin("white", irow + 3, icol + 3);
+                }
+            }
+        }
+    }
 }
