@@ -150,21 +150,17 @@ WebAssembly.instantiateStreaming(fetch('main.wasm'), {
 });
 
 function getMinimaxMove(depth) {
-    const array = new Uint32Array(memory.buffer);
-    for (let i = 0; i < moves.length; i++) {
-        array[i] = moves[i];
-    }
+    const array = new Int32Array(memory.buffer, 0, moves.length);
+    array.set(moves);
     
-    return core.getMinimaxMove(0, moves.length, depth);
+    return core.getMinimaxMove(array.byteOffset, moves.length, depth);
 }
 
 function endStateReached() {
-    const array = new Uint32Array(memory.buffer);
-    for (let i = 0; i < moves.length; i++) {
-        array[i] = moves[i];
-    }
+    const array = new Int32Array(memory.buffer, 0, moves.length);
+    array.set(moves);
 
-    const result = core.endStateReached(0, moves.length);
+    const result = core.endStateReached(array.byteOffset, moves.length);
 
     if (result == 0) {
         console.log('Tie');
