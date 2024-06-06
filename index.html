@@ -3,87 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>connect-four</title>
+    <title>(Beta) Connect-Four AI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;1,100;1,200;1,300;1,400;1,500&family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>    
+<body>
     <div>
         <canvas id="board"></canvas>
     </div>
-
+    
     <section>
-        <div id="play-button">
-            <button  onclick="play()">
-                Play
-            </button>
-            <button onclick="reset()">
-                Reset
-            </button>
+        <div id="options">
+            <div class="player-option">
+                <span>Player <strong style="color: #ce5454">Red</strong></span>
+                <select class="hidden" name="player-one-depth-select" id="player-one-depth-select">
+                    <option value="1">1</option>
+                    <option selected value="5">5</option>
+                    <option value="9">9</option>
+                    <option value="13">13</option>
+                </select>
+
+                <select name="player-one-agent-select" id="player-one-agent-select">
+                    <option value="human">Human</option>
+                    <option value="minimax">Minimax</option>
+                </select>
+            </div>
+
+            <div class="player-option">
+                <span>Player <strong style="color: #c3a343">Yellow</strong></span>
+                <select class="hidden" name="player-two-depth-select" id="player-two-depth-select">
+                    <option value="1">1</option>
+                    <option selected value="5">5</option>
+                    <option value="9">9</option>
+                    <option value="13">13</option>
+                </select>
+
+                <select name="player-two-agent-select" id="player-two-agent-select">
+                    <option value="human">Human</option>
+                    <option value="minimax">Minimax</option>
+                </select>
+            </div>
         </div>
 
-        <div>
-            <div>
-                <span>Player Red</span>
+        <div id="buttons">
+            <button id="play-button" onclick="play()">Start Game</button>
+            <button onclick="reset()">Reset</button>
+        </div>
 
-                <select name="player-one-select" id="player-one-select">
-                    <option value="human">Human</option>
-                    <option value="minimax">Minimax</option>
-                </select>
-
-                <span>
-                    <input class="hidden" type="range" min="1", max="12" step="1" id="player-one-depth-input">
-                    <label id="player-one-depth-label" for="player-one-depth-input"></label>
-                </span>
-            </div>
-
-            <div>
-                <span>Player Yellow</span>
-
-                <select name="player-two-select" id="player-two-select">
-                    <option value="human">Human</option>
-                    <option value="minimax">Minimax</option>
-                </select>
-
-                <span>
-                    <input class="hidden" type="range" min="1", max="12" step="1" id="player-two-depth-input">
-                    <label id="player-two-depth-label" for="player-two-depth-input"></label>
-                </span>
-            </div>
-
-            <table id="stat-table" class="hidden">
-                <thead>
-                <tr>
-                    <th> </th>
-                    <th>No. of Evaluations</th>
-                    <th>Time <em>(ms)</em></th>
-                    <th>Evals/ms</th>
+        <table id="stat-table" class="hidden">
+            <thead>
+            <tr>
+                <th> </th>
+                <th>No. of Evaluations</th>
+                <th>Time <em>(ms)</em></th>
+                <th>Evals/ms</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr id="stat-current">
+                    <th>Current</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                 </tr>
-                </thead>
-                <tbody>
-                    <tr id="stat-current">
-                        <th>Current</th>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr id="stat-total">
-                        <th>Total</th>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr id="stat-average">
-                        <th>Average</th>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                <tr id="stat-total">
+                    <th>Total</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr id="stat-average">
+                    <th>Average</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
     </section>
     
     <script src="script.js"></script>

@@ -1,0 +1,115 @@
+:root {
+    --blue: #0273b2;
+    --blue-subtle: #dff4ff;
+    --orange: #da6512;
+    --orange-subtle: #feeedb;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'IBM Plex Sans';
+    color: #222222;
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
+    padding: 0.8em;
+}
+
+section {
+    width: 560px;
+    padding: 0 0.8em;
+    margin: 0 auto;
+}
+
+.hidden {
+    display: none;
+}
+
+table {
+    width: 100%;
+    margin: 0.8em 0;
+    border-collapse: collapse;
+    line-height: normal;
+}
+
+th, td {
+    border: 1px solid #dddddd;
+}
+
+th {
+    background-color: #f6f6f6;
+    padding: 0.1em 0.5em;
+    font-weight: 600;
+}
+
+td {
+    padding: 0.1em 0.5em;
+}
+
+button {
+    background: none;
+    border: 1px solid #eeeeee;
+    font: inherit;
+    cursor: pointer;
+    font-weight: 400;
+    padding: 0.4em 1em;
+    border-radius: 3px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+#buttons {
+    display: flex;
+}
+
+#play-button {
+    border: none;
+    width: 100%;
+    margin-right: 0.2em;
+    text-align: left;
+    font-weight: 500;
+    background-color: #eeeeee;
+}
+
+#options {
+    margin-bottom: 0.8em;
+    border: 1px solid #eeeeee;
+    border-radius: 3px;
+}
+
+.player-option:first-child {
+    border-bottom: 1px solid #eeeeee;
+}
+
+.player-option {
+    display: flex;
+    padding: 0.4em 0.4em 0.4em 0.8em;
+    align-items: center;
+    /* justify-content: center; */
+}
+
+.player-option span {
+    margin-right: auto;
+    text-align: center;
+}
+
+.player-option span strong {
+    font-weight: 600;
+}
+
+.player-option select {
+    font-family: inherit;
+    font-size: 0.9em;
+    padding: 0.2em 0.4em;
+    border: 1px solid #eeeeee;
+    border-radius: 2px;
+    margin-left: 0.2em;
+}
+

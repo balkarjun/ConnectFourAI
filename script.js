@@ -152,7 +152,7 @@ WebAssembly.instantiateStreaming(fetch('main.wasm'), {
 function getMinimaxMove(depth) {
     const array = new Int32Array(memory.buffer, 0, moves.length);
     array.set(moves);
-    
+
     return core.getMinimaxMove(array.byteOffset, moves.length, depth);
 }
 
@@ -179,36 +179,24 @@ function getEvaluations() {
 
 /* UI Controls START */
 const agentSelect = [
-    document.getElementById('player-one-select'),
-    document.getElementById('player-two-select')
+    document.getElementById('player-one-agent-select'),
+    document.getElementById('player-two-agent-select')
 ];
 
-const depthInput = [
-    document.getElementById('player-one-depth-input'),
-    document.getElementById('player-two-depth-input')
-];
-
-const depthLabel = [
-    document.getElementById('player-one-depth-label'),
-    document.getElementById('player-two-depth-label')
+const depthSelect = [
+    document.getElementById('player-one-depth-select'),
+    document.getElementById('player-two-depth-select')
 ];
 
 for (let p = 0; p <= 1; p++) {
     agentSelect[p].addEventListener('change', function() {
-        // show depth picker if minimax
+        // show depth select if minimax
         if (this.value == 'minimax') {
-            depthInput[p].classList.remove('hidden');
-            depthLabel[p].innerText = depthInput[p].value;
+            depthSelect[p].classList.remove('hidden');
         } else {
-            depthInput[p].classList.add('hidden');
-            depthLabel[p].innerText = '';
+            depthSelect[p].classList.add('hidden');
         }
     });
-
-    // update the depth picker's label as its value changes
-    depthInput[p].oninput = function() {
-        depthLabel[p].innerText = depthInput[p].value;
-    }
 }
 /* UI Controls END */
 
@@ -232,7 +220,8 @@ function update() {
     }
 
     const agent = agentSelect[moves.length & 1].value;
-    const depth = Number(depthInput[moves.length & 1].value);
+    const depth = Number(depthSelect[moves.length & 1].value);
+    console.log(depth);
     if (agent == 'minimax') {
         const startTime = performance.now();
         const move = getMinimaxMove(depth);
