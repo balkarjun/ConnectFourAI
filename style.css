@@ -13,9 +13,11 @@
 
 body {
     font-family: 'IBM Plex Sans';
+    font-size: 1.1em;
+    line-height: 1.4;
     color: #222222;
-    width: calc(560px + 1.6em);
-    margin: 0 auto;
+    width: calc(630px + 1.6em);
+    margin: 2em auto;
 }
 
 canvas {
@@ -24,7 +26,7 @@ canvas {
 }
 
 section {
-    width: 560px;
+    width: 630px;
     margin: 0 auto;
 }
 
@@ -67,6 +69,7 @@ button {
 
 #buttons {
     display: flex;
+    margin-bottom: 0.8em;
 }
 
 #play-button {
@@ -113,3 +116,45 @@ button {
     margin-left: 0.2em;
 }
 
+ul {
+    list-style-position: inside;
+    margin: 0.8em 0;
+    margin-left: 1em;
+}
+
+p {
+    text-align: justify;
+    margin-top: 0.8em; 
+}
+
+h1, h2, h3, h4 {
+    line-height: 1.2;
+}
+
+h2, h3 {
+    margin-top: 1em;
+    font-weight: 600;
+}
+
+h1 + p, h2 + p, h3 + p {
+    margin-top: 0.4em;
+}
+
+section h1 {
+    font-size: 2em;
+}
+
+footer {
+    color: #666666;
+    margin-top: 1em;
+    padding: 0 0.8em;
+}
+
+a {
+    color: var(--blue);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
