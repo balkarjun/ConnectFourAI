@@ -61,7 +61,7 @@ function reset() {
 
     evaluations = [];
     elapsedTime = [];
-    clearStatTable();
+    clearStats();
 }
 
 canvas.addEventListener("mousemove", event => {
@@ -84,13 +84,6 @@ canvas.addEventListener("click", event => {
 
 function play() {
     isPlaying = true;
-
-    // hide the stat table in human vs human games
-    if (agentSelect[0].value == 'human' && agentSelect[1].value == 'human') {
-        document.getElementById('stat-table').classList.add('hidden');
-    } else {
-        document.getElementById('stat-table').classList.remove('hidden');
-    }
 }
 
 function makeMove(icol) {
@@ -254,51 +247,79 @@ function update() {
         evaluations.push(getEvaluations());
         elapsedTime.push(endTime - startTime);
 
-        updateStatTable();
+        updateStats();
     } else if (agent == 'human' && humanMove != -1) {
         makeMove(humanMove);
         humanMove = -1;
     }
 }
 
-function updateStatTable() {
-    const formatter = Intl.NumberFormat('en');
-    
-    // current
-    const currentEval = evaluations[evaluations.length - 1];  
-    const currentTime = elapsedTime[elapsedTime.length - 1];
-    const currentRate = (currentTime < 1) ? currentEval : (currentEval / currentTime);
-
-    const current = document.querySelectorAll('#stat-current td');
-    current[0].innerText = formatter.format(Math.round(currentEval));
-    current[1].innerText = formatter.format(Math.round(currentTime));
-    current[2].innerText = formatter.format(Math.round(currentRate));
-
-    // total
-    const totalEval = evaluations.reduce((a, b) => a + b, 0);
-    const totalTime = elapsedTime.reduce((a, b) => a + b, 0);
-    const totalRate = (totalTime < 1) ? totalEval : (totalEval / totalTime);
-
-    const total = document.querySelectorAll('#stat-total td');
-    total[0].innerText = formatter.format(Math.round(totalEval));
-    total[1].innerText = formatter.format(Math.round(totalTime));
-    total[2].innerText = formatter.format(Math.round(totalRate));
-
-    // average
-    const avgEval = totalEval / evaluations.length;
-    const avgTime = totalTime / elapsedTime.length;
-    const avgRate = (avgTime < 1) ? avgEval : (avgEval / avgTime);
-
-    const average = document.querySelectorAll('#stat-average td');
-    average[0].innerText = formatter.format(Math.round(avgEval));
-    average[1].innerText = formatter.format(Math.round(avgTime));
-    average[2].innerText = formatter.format(Math.round(avgRate));
+function clearStats() {
+    document.querySelectorAll('.player-statistics').forEach(element => {
+        element.classList.add('hidden');
+    });
 }
 
-function clearStatTable() {
-    document.querySelectorAll('tbody td').forEach(item => {
-        item.innerText = '';
-    });
+function updateStats() {
+    const statistics = document.querySelectorAll('.player-statistics');
+
+    function getCurrentText(evals, times) {
+        const formatter = Intl.NumberFormat('en');
+
+        const currentEval = evals[evals.length - 1];
+        const currentTime = Math.round(times[times.length - 1]);
+
+        if (currentTime < 1) {
+            return `${formatter.format(currentEval)} evals | <1 ms`
+        }
+        return `${formatter.format(currentEval)} evals | ${formatter.format(currentTime)} ms`;
+    }
+
+    function getTotalText(evals, times) {
+        const formatter = Intl.NumberFormat('en');
+
+        const totalEval = evals.reduce((a, b) => a + b, 0);
+        const totalTime = Math.round(times.reduce((a, b) => a + b, 0));
+
+        if (totalTime < 1) {
+            return `${formatter.format(totalEval)} evals | <1 ms`;
+        }
+        return `${formatter.format(totalEval)} evals | ${formatter.format(totalTime)} ms`;
+    }
+
+    const redCurrent = document.getElementById('player-red-current');
+    const redTotal = document.getElementById('player-red-total');
+
+    const yellowCurrent = document.getElementById('player-yellow-current');
+    const yellowTotal = document.getElementById('player-yellow-total');
+
+    // red is AI, yellow is human
+    if (agentSelect[0].value == 'minimax' && agentSelect[1].value == 'human') {
+        statistics[0].classList.remove('hidden');
+        redCurrent.innerText = getCurrentText(evaluations, elapsedTime);
+        redTotal.innerText = getTotalText(evaluations, elapsedTime);
+    } 
+    // red is human, yellow is AI
+    else if (agentSelect[0].value == 'human' && agentSelect[1].value == 'minimax') {
+        statistics[1].classList.remove('hidden');
+        yellowCurrent.innerText = getCurrentText(evaluations, elapsedTime);
+        yellowTotal.innerHTML = getTotalText(evaluations, elapsedTime);
+    }
+    // both AI
+    else {
+        statistics[0].classList.remove('hidden');
+        statistics[1].classList.remove('hidden');
+        // elements at even indices
+        const redEvals = evaluations.filter((_, idx) => (idx % 2) == 0);
+        const redTimes = elapsedTime.filter((_, idx) => (idx % 2) == 0);
+        redCurrent.innerText = getCurrentText(redEvals, redTimes);
+        redTotal.innerText = getTotalText(redEvals, redTimes);
+        // elements at odd indices
+        const yellowEvals = evaluations.filter((_, idx) => (idx % 2) == 1);
+        const yellowTimes = elapsedTime.filter((_, idx) => (idx % 2) == 1);
+        yellowCurrent.innerText = getCurrentText(yellowEvals, yellowTimes);
+        yellowTotal.innerHTML = getTotalText(yellowEvals, yellowTimes);
+    }
 }
 
 function draw() {

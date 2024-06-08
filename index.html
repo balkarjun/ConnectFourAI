@@ -29,67 +29,60 @@
         </div>
 
         <div id="options">
-            <div class="player-option">
-                <span>Player <strong style="color: #ce5454">Red</strong></span>
-                <select class="hidden" name="player-one-depth-select" id="player-one-depth-select">
-                    <option value="1">Very Easy (1)</option>
-                    <option value="2">Easy (2)</option>
-                    <option selected value="5">Medium (5)</option>
-                    <option value="11">Hard (11)</option>
-                </select>
+            <div class="player-options">
+                <div class="player-controls">
+                    <span>Player <strong style="color: #ce5454">Red</strong></span>
+                    <select class="hidden" name="player-one-depth-select" id="player-one-depth-select">
+                        <option value="1">Very Easy (1)</option>
+                        <option value="2">Easy (2)</option>
+                        <option selected value="5">Medium (5)</option>
+                        <option value="11">Hard (11)</option>
+                    </select>
 
-                <select name="player-one-agent-select" id="player-one-agent-select">
-                    <option value="human">Human</option>
-                    <option value="minimax">Minimax</option>
-                </select>
+                    <select name="player-one-agent-select" id="player-one-agent-select">
+                        <option value="human">Human</option>
+                        <option value="minimax">Minimax</option>
+                    </select>
+                </div>
+                <div class="player-statistics hidden">
+                    <div>
+                        <strong>Current</strong>
+                        <strong>Total</strong>
+                    </div>
+                    <div>
+                        <span id="player-red-current"></span>
+                        <span id="player-red-total"></span>
+                    </div>
+                </div>
             </div>
+            
+            <div class="player-options">
+                <div class="player-controls">
+                    <span>Player <strong style="color: #c3a343">Yellow</strong></span>
+                    <select name="player-two-depth-select" id="player-two-depth-select">
+                        <option value="1">Very Easy (1)</option>
+                        <option value="2">Easy (2)</option>
+                        <option selected value="5">Medium (5)</option>
+                        <option value="11">Hard (11)</option>
+                    </select>
 
-            <div class="player-option">
-                <span>Player <strong style="color: #c3a343">Yellow</strong></span>
-                <select name="player-two-depth-select" id="player-two-depth-select">
-                    <option value="1">Very Easy (1)</option>
-                    <option value="2">Easy (2)</option>
-                    <option selected value="5">Medium (5)</option>
-                    <option value="11">Hard (11)</option>
-                </select>
-
-                <select name="player-two-agent-select" id="player-two-agent-select">
-                    <option value="human">Human</option>
-                    <option value="minimax" selected>Minimax</option>
-                </select>
+                    <select name="player-two-agent-select" id="player-two-agent-select">
+                        <option value="human">Human</option>
+                        <option value="minimax" selected>Minimax</option>
+                    </select>
+                </div>
+                <div class="player-statistics hidden">
+                    <div>
+                        <strong>Current</strong>
+                        <strong>Total</strong>
+                    </div>
+                    <div>
+                        <span id="player-yellow-current"></span>
+                        <span id="player-yellow-total"></span>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <table id="stat-table">
-            <thead>
-            <tr>
-                <th> </th>
-                <th>No. of Evaluations</th>
-                <th>Time <em>(ms)</em></th>
-                <th>Evals/ms</th>
-            </tr>
-            </thead>
-            <tbody>
-                <tr id="stat-current">
-                    <th>Current</th>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr id="stat-total">
-                    <th>Total</th>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr id="stat-average">
-                    <th>Average</th>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </tbody>
-        </table>
     </section>
 
     <section>

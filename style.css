@@ -81,39 +81,50 @@ button {
     background-color: #eeeeee;
 }
 
-#options {
-    margin-bottom: 0.8em;
+.player-options {
     border: 1px solid #eeeeee;
     border-radius: 3px;
+    margin-bottom: 0.8em;
 }
 
-.player-option:first-child {
-    border-bottom: 1px solid #eeeeee;
-}
-
-.player-option {
+.player-controls {
     display: flex;
     padding: 0.4em 0.4em 0.4em 0.8em;
     align-items: center;
-    /* justify-content: center; */
 }
 
-.player-option span {
+.player-controls span {
     margin-right: auto;
     text-align: center;
 }
 
-.player-option span strong {
+.player-controls span strong {
     font-weight: 600;
 }
 
-.player-option select {
+.player-controls select {
     font-family: inherit;
     font-size: 0.9em;
-    padding: 0.2em 0.4em;
+    padding: 0.1em 0.4em;
     border: 1px solid #eeeeee;
     border-radius: 2px;
     margin-left: 0.2em;
+}
+
+.player-statistics {
+    font-size: 0.8em;
+    border-top: 1px solid #eeeeee;
+    padding: 0.4em 1em 0.4em 1em;
+}
+
+.player-statistics strong {
+    font-weight: 500;
+}
+
+.player-statistics div {
+    display: flex;
+    color: #555555;
+    justify-content: space-between;
 }
 
 ul {
