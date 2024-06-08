@@ -1,21 +1,25 @@
-const boardWidth  = 560;
-const boardHeight = 480;
+const boardWidth = 630;
+const boardHeight = 540;
 
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
-// https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
-// actual visual size (css)
-canvas.style.width = `${boardWidth}px`;
-canvas.style.height = `${boardHeight}px`;
 
-// scale canvas in memory to account for extra pixel density on HiDPI displays
-// set scale to 1 to see what would happen normally
-const scale = window.devicePixelRatio;
-canvas.width = Math.floor(boardWidth * scale);
-canvas.height = Math.floor(boardHeight * scale);
+function scaleCanvas() {
+    // actual visual size (css)
+    canvas.style.width = `${boardWidth}px`;
+    canvas.style.height = `${boardHeight}px`;
+    
+    // https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio
+    // scale canvas in memory to account for extra pixel density on HiDPI displays
+    // set ratio to 1 to see what would happen normally
+    const ratio = window.devicePixelRatio;
+    canvas.width = Math.floor(boardWidth  * ratio);
+    canvas.height = Math.floor(boardHeight * ratio);
 
-// normalize coordinate system to use visual size
-ctx.scale(scale, scale);
+    // normalize coordinate system to use visual size
+    ctx.scale(ratio, ratio);
+}
+scaleCanvas();
 
 const nrows = 6;
 const ncols = 7;
@@ -24,6 +28,7 @@ const lineWidth = 4;
 
 const cellWidth = (boardWidth - lineWidth)/ncols;
 const cellHeight = (boardHeight - lineWidth)/nrows;
+const radius = cellWidth/2;
 
 const boardFg = "#3980a0";
 const boardBg = "#eef7ff";
@@ -33,8 +38,6 @@ const coinYellow = "#dfc352";
 
 const coinRedBorder = "#b94343";
 const coinYellowBorder = "#c3a343";
-
-const radius = cellWidth/2;
 
 // store indices of columns where coins were placed
 let moves = [];
@@ -59,6 +62,7 @@ function reset() {
 function play() {
     isPlaying = true;
 
+    // hide the stat table in human vs human games
     if (agentSelect[0].value == 'human' && agentSelect[1].value == 'human') {
         document.getElementById('stat-table').classList.add('hidden');
     } else {
@@ -68,6 +72,7 @@ function play() {
 
 canvas.addEventListener("click", event => {
     if (!isPlaying) return;
+    // get column index from click location
     const rect = canvas.getBoundingClientRect();
     humanMove = Math.floor((event.clientX - rect.left) / cellWidth);
 });
@@ -80,6 +85,7 @@ function makeMove(icol) {
     heights[icol]++;
 }
 
+// draw the empty board
 function drawGrid() {
     ctx.fillStyle = boardFg;
 
@@ -90,10 +96,10 @@ function drawGrid() {
     ctx.lineWidth = lineWidth;
     
     for (let irow = 0; irow < nrows; irow++) {
-        const circleY = (irow + 1)* cellHeight - radius + lineWidth/2;
+        const circleY = (irow + 1) * cellHeight - radius + lineWidth/2;
 
         for (let icol = 0; icol < ncols; icol++) {
-            const circleX = (icol + 1)* cellWidth - radius + lineWidth/2;
+            const circleX = (icol + 1) * cellWidth - radius + lineWidth/2;
 
             ctx.beginPath();
             ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
@@ -110,23 +116,23 @@ function drawCoin(fillStyle, strokeStyle, irow, icol) {
     ctx.lineWidth = lineWidth;
 
     ctx.beginPath();
-    const coinX = (icol + 1)* cellWidth - radius + lineWidth/2;
-    const coinY = (irow + 1)* cellHeight - radius + lineWidth/2;
+    const coinX = (icol + 1) * cellWidth - radius + lineWidth/2;
+    const coinY = (irow + 1) * cellHeight - radius + lineWidth/2;
 
-    ctx.arc(coinX, coinY, radius - 2*lineWidth, 0, 2 * Math.PI);
+    ctx.arc(coinX, coinY, radius - 2 * lineWidth, 0, 2 * Math.PI);
 
     ctx.fill();
     ctx.stroke();
     ctx.closePath();
 }
 
-function drawSmallCoin(strokeStyle, irow, icol) {
-    ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = lineWidth*2;
+function drawWinToken(irow, icol) {
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = lineWidth * 2;
 
     ctx.beginPath();
-    const coinX = (icol + 1)* cellWidth - radius + lineWidth/2;
-    const coinY = (irow + 1)* cellHeight - radius + lineWidth/2;
+    const coinX = (icol + 1) * cellWidth - radius + lineWidth/2;
+    const coinY = (irow + 1) * cellHeight - radius + lineWidth/2;
 
     ctx.arc(coinX, coinY, cellWidth/4, 0, 2 * Math.PI);
 
@@ -282,94 +288,90 @@ function clearStatTable() {
 function draw() {
     drawGrid();
 
-    // draw current state of board
+    let board = [
+        [-1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1],
+        [-1, -1, -1, -1, -1, -1, -1],
+    ];
     let hcols = [0, 0, 0, 0, 0, 0, 0];
     for (let counter = 0; counter < moves.length; counter++) {
         const icol = moves[counter];
         const irow = nrows - hcols[icol] - 1;
+        
+        board[irow][icol] = (counter & 1); // 0 for Red, 1 for Yellow
 
-        const fillColor = (counter % 2 == 0) ? coinRed : coinYellow;
-        const strokeColor = (counter % 2 == 0) ? coinRedBorder : coinYellowBorder;
+        // draw coins on grid
+        if (board[irow][icol] == 0) {
+            drawCoin(coinRed, coinRedBorder, irow, icol);
+        } else if (board[irow][icol] == 1) {
+            drawCoin(coinYellow, coinYellowBorder, irow, icol);
+        }
 
-        drawCoin(fillColor, strokeColor, irow, icol);
         hcols[icol]++;
     }
 
     // indicate winning token
-    hcols = [0, 0, 0, 0, 0, 0, 0];
     if (!isPlaying && moves.length > 0) {
-        let board = [
-            [0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0]
-        ];
-        for (let counter = 0; counter < moves.length; counter++) {
-            const icol = moves[counter];
-            const irow = nrows - hcols[icol] - 1;
-            board[irow][icol] = (counter & 1) + 1;
-            hcols[icol]++;
-        }
-
         // horizontal
         for (let irow = 0; irow < nrows; irow++) {
             for (let icol = 0; icol < ncols - 3; icol++) {
-                if ((board[irow][icol] != 0) && 
+                if ((board[irow][icol] != -1) && 
                     (board[irow][icol] == board[irow][icol + 1]) &&
                     (board[irow][icol] == board[irow][icol + 2]) &&
                     (board[irow][icol] == board[irow][icol + 3])
                 ) {
-                    drawSmallCoin("white", irow, icol);
-                    drawSmallCoin("white", irow, icol + 1);
-                    drawSmallCoin("white", irow, icol + 2);
-                    drawSmallCoin("white", irow, icol + 3);
+                    drawWinToken(irow, icol);
+                    drawWinToken(irow, icol + 1);
+                    drawWinToken(irow, icol + 2);
+                    drawWinToken(irow, icol + 3);
                 }
             }
         }
         // vertical
         for (let irow = 0; irow < nrows - 3; irow++) {
             for (let icol = 0; icol < ncols; icol++) {
-                if ((board[irow][icol] != 0) && 
+                if ((board[irow][icol] != -1) && 
                     (board[irow][icol] == board[irow + 1][icol]) &&
                     (board[irow][icol] == board[irow + 2][icol]) &&
                     (board[irow][icol] == board[irow + 3][icol])
                 ) {
-                    drawSmallCoin("white", irow, icol);
-                    drawSmallCoin("white", irow + 1, icol);
-                    drawSmallCoin("white", irow + 2, icol);
-                    drawSmallCoin("white", irow + 3, icol);
+                    drawWinToken(irow, icol);
+                    drawWinToken(irow + 1, icol);
+                    drawWinToken(irow + 2, icol);
+                    drawWinToken(irow + 3, icol);
                 }
             }
         }
         // positive diagonal
         for (let irow = 0; irow < nrows - 3; irow++) {
             for (let icol = 3; icol < ncols; icol++) {
-                if ((board[irow][icol] != 0) && 
+                if ((board[irow][icol] != -1) && 
                     (board[irow][icol] == board[irow + 1][icol - 1]) &&
                     (board[irow][icol] == board[irow + 2][icol - 2]) &&
                     (board[irow][icol] == board[irow + 3][icol - 3])
                 ) {
-                    drawSmallCoin("white", irow, icol);
-                    drawSmallCoin("white", irow + 1, icol - 1);
-                    drawSmallCoin("white", irow + 2, icol - 2);
-                    drawSmallCoin("white", irow + 3, icol - 3);
+                    drawWinToken(irow, icol);
+                    drawWinToken(irow + 1, icol - 1);
+                    drawWinToken(irow + 2, icol - 2);
+                    drawWinToken(irow + 3, icol - 3);
                 }
             }
         }
         // negative diagonal
         for (let irow = 0; irow < nrows - 3; irow++) {
             for (let icol = 0; icol < ncols - 3; icol++) {
-                if ((board[irow][icol] != 0) && 
+                if ((board[irow][icol] != -1) && 
                     (board[irow][icol] == board[irow + 1][icol + 1]) &&
                     (board[irow][icol] == board[irow + 2][icol + 2]) &&
                     (board[irow][icol] == board[irow + 3][icol + 3])
                 ) {
-                    drawSmallCoin("white", irow, icol);
-                    drawSmallCoin("white", irow + 1, icol + 1);
-                    drawSmallCoin("white", irow + 2, icol + 2);
-                    drawSmallCoin("white", irow + 3, icol + 3);
+                    drawWinToken(irow, icol);
+                    drawWinToken(irow + 1, icol + 1);
+                    drawWinToken(irow + 2, icol + 2);
+                    drawWinToken(irow + 3, icol + 3);
                 }
             }
         }
