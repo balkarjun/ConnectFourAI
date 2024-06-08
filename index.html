@@ -10,11 +10,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <section>
+        <h1>Connect Four AI</h1>
+        <p>
+            An interactive Connect Four game with a powerful AI opponent. The AI uses a depth-limited minimax algorithm with alpha-beta pruning. 
+            It was written in C++ and compiled to WebAssembly resulting in a <em>blazingly fast</em> AI that can run locally on your browser.
+        </p>
+    </section>
+    
     <div>
         <canvas id="board"></canvas>
     </div>
-    
+
     <section>
+        <div id="buttons">
+            <button id="play-button" onclick="play()">Start Game</button>
+            <button onclick="reset()">Reset</button>
+        </div>
+
         <div id="options">
             <div class="player-option">
                 <span>Player <strong style="color: #ce5454">Red</strong></span>
@@ -33,7 +46,7 @@
 
             <div class="player-option">
                 <span>Player <strong style="color: #c3a343">Yellow</strong></span>
-                <select class="hidden" name="player-two-depth-select" id="player-two-depth-select">
+                <select name="player-two-depth-select" id="player-two-depth-select">
                     <option value="1">Very Easy (1)</option>
                     <option value="2">Easy (2)</option>
                     <option selected value="5">Medium (5)</option>
@@ -42,17 +55,12 @@
 
                 <select name="player-two-agent-select" id="player-two-agent-select">
                     <option value="human">Human</option>
-                    <option value="minimax">Minimax</option>
+                    <option value="minimax" selected>Minimax</option>
                 </select>
             </div>
         </div>
 
-        <div id="buttons">
-            <button id="play-button" onclick="play()">Start Game</button>
-            <button onclick="reset()">Reset</button>
-        </div>
-
-        <table id="stat-table" class="hidden">
+        <table id="stat-table">
             <thead>
             <tr>
                 <th> </th>
@@ -84,6 +92,37 @@
         </table>
     </section>
 
+    <section>
+        <h3>Instructions</h3>
+        <p>
+            You can choose between two agents:<br>
+            <em>Human</em> – Make moves manually. Use this to play against a friend or the AI.<br>
+            <em>Minimax</em> – AI that uses the <a href="https://en.wikipedia.org/wiki/Minimax">minimax</a> algorithm with alpha-beta pruning. You can adjust the AI's strength by adjusting its search depth.
+        
+            <ul>
+                <li>Very Easy (Depth 1) is very naive</li>
+                <li>Easy (Depth 2) will try to block your wins</li>
+                <li>Medium (Depth 5) makes for a tough opponent</li>
+                <li>Hard (Depth 11) is the slowest but also the strongest</li>
+            </ul>
+        </p>
+        <h3>Technical Details</h3>
+        <p>I wrote a whole <a href="#">blog post</a> on the techniques that went into making this AI.</p>
+        <p>
+            The UI was made using HTML, CSS and Javascript. 
+            JS was too slow for handling the AI logic since the minimax algorithm has to evaluate <em>millions</em> of positions before making a move.
+            A common solution is to write the AI in a more performant language and have it run on the server-side. But that requires, well, setting up a server.
+        </p>
+        <p>
+            Instead, the algorithm was written in C++ and compiled to WebAssembly using <a href="https://emscripten.org/">Emscripten</a>.
+            This allows C++ to run completely on the client-side, no server required!
+            The compiled <em>.wasm</em> file is only 2KB in size and is not much slower than running C++ natively. On Google Chrome running on my Apple M1 Macbook, the AI can evaluate ~20,000 positions in 1 millisecond.
+        </p>
+        <p>This project is <a href="#">open source</a>. You can find more projects over at my <a href="">website</a>.</p>
+    </section>
+    <footer>
+        © 2024 Arjun Balakrishnan
+    </footer>
     <script src="script.js"></script>
 </body>
 </html>
