@@ -39,10 +39,14 @@ const coinYellow = "#dfc352";
 const coinRedBorder = "#b94343";
 const coinYellowBorder = "#c3a343";
 
+const coinRedFaded = "#e9b2b2";
+const coinYellowFaded = "#dbc88e";
+
 // store indices of columns where coins were placed
 let moves = [];
 let heights = [0, 0, 0, 0, 0, 0, 0];
 let isPlaying = false;
+let nextMove = -1;
 let humanMove = -1;
 
 let evaluations = [];
@@ -52,12 +56,31 @@ function reset() {
     moves = [];
     heights = [0, 0, 0, 0, 0, 0, 0];
     isPlaying = false;
+    nextMove = -1;
     humanMove = -1;
 
     evaluations = [];
     elapsedTime = [];
     clearStatTable();
 }
+
+canvas.addEventListener("mousemove", event => {
+    // ensure next move's agent is human
+    if (!isPlaying || agentSelect[moves.length & 1].value != 'human') {
+        nextMove = -1;
+        return;
+    }
+    // get column index from mouse pointer location
+    const rect = canvas.getBoundingClientRect();
+    nextMove = Math.floor((event.clientX - rect.left) / cellWidth);
+});
+
+canvas.addEventListener("click", event => {
+    if (!isPlaying) return;
+    // get column index from click location
+    const rect = canvas.getBoundingClientRect();
+    humanMove = Math.floor((event.clientX - rect.left) / cellWidth);
+});
 
 function play() {
     isPlaying = true;
@@ -69,13 +92,6 @@ function play() {
         document.getElementById('stat-table').classList.remove('hidden');
     }
 }
-
-canvas.addEventListener("click", event => {
-    if (!isPlaying) return;
-    // get column index from click location
-    const rect = canvas.getBoundingClientRect();
-    humanMove = Math.floor((event.clientX - rect.left) / cellWidth);
-});
 
 function makeMove(icol) {
     // ensure the move is valid
@@ -227,7 +243,7 @@ function update() {
 
     const agent = agentSelect[moves.length & 1].value;
     const depth = Number(depthSelect[moves.length & 1].value);
-    console.log(depth);
+
     if (agent == 'minimax') {
         const startTime = performance.now();
         const move = getMinimaxMove(depth);
@@ -287,6 +303,12 @@ function clearStatTable() {
 
 function draw() {
     drawGrid();
+    
+    // highlight next move
+    if (isPlaying && nextMove != -1 && heights[nextMove] < nrows) {
+        const strokeStyle = ((moves.length & 1) == 0) ? coinRedFaded : coinYellowFaded;
+        drawCoin(boardBg, strokeStyle, nrows - heights[nextMove] - 1, nextMove);
+    }
 
     let board = [
         [-1, -1, -1, -1, -1, -1, -1],
