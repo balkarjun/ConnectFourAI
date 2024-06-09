@@ -4,6 +4,10 @@ const boardHeight = 540;
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 
+const playButton = document.getElementById('play-button');
+const backButton = document.getElementById('back-button');
+const resetButton = document.getElementById('reset-button');
+
 function scaleCanvas() {
     // actual visual size (css)
     canvas.style.width = `${boardWidth}px`;
@@ -196,14 +200,20 @@ function endStateReached() {
 
     const result = core.endStateReached(array.byteOffset, moves.length);
 
-    if (result == 0) {
-        console.log('Tie');
-    } else if (result > 0) {
-        console.log('Red Won');
-    } else if (result != -1) {
-        console.log('Yellow Won');
-    }
     return result != -1;
+}
+
+function getWinner() {
+    const array = new Int32Array(memory.buffer, 0, moves.length);
+    array.set(moves);
+
+    const result = core.endStateReached(array.byteOffset, moves.length);
+
+    if (result == 0) return 'tie';
+    else if (result > 0) return 'red';
+    else if (result != -1) return 'yellow';
+
+    return 'none';
 }
 
 function getEvaluations() {
@@ -247,6 +257,46 @@ function gameLoop(timeStamp) {
 }
 
 function update() {
+    if (moves.length == 0) {
+        backButton.setAttribute('disabled', true);
+        resetButton.setAttribute('disabled', true);
+    } else {
+        backButton.removeAttribute('disabled');
+        resetButton.removeAttribute('disabled');
+    }
+
+    if (isPlaying) {
+        playButton.classList.remove('active');
+        playButton.classList.remove('win-yellow');
+        playButton.classList.remove('win-red');
+
+        playButton.innerText = (moves.length % 2 == 0) ? "Red's Turn" : "Yellow's Turn";
+    } else {
+        playButton.classList.add('active');
+        playButton.classList.remove('win-yellow');
+        playButton.classList.remove('win-red');
+
+        playButton.innerText = "Play";
+
+        if (moves.length > 0) {
+            const winner = getWinner();
+
+            if (winner == 'tie') {
+                playButton.innerText = "It's a Tie";
+            } else if (winner == 'red') {
+                playButton.innerText = 'Red Won';
+                playButton.classList.remove('active');
+                playButton.classList.remove('win-yellow');
+                playButton.classList.add('win-red');
+            } else if (winner == 'yellow') {
+                playButton.innerText = 'Yellow Won';
+                playButton.classList.remove('active');
+                playButton.classList.remove('win-red');
+                playButton.classList.add('win-yellow');
+            }
+        }
+    }
+
     if (!isPlaying) return;
     if (endStateReached()) {
         isPlaying = false;
@@ -289,7 +339,7 @@ function updateStats() {
         const currentTime = Math.round(times[times.length - 1]);
 
         if (currentTime < 1) {
-            return `${formatter.format(currentEval)} evals | <1 ms`
+            return `${formatter.format(currentEval)} evals | <1 ms`;
         }
         return `${formatter.format(currentEval)} evals | ${formatter.format(currentTime)} ms`;
     }

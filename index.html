@@ -18,17 +18,19 @@
         </p>
     </section>
     
+    <section>
+        <div id="buttons">
+            <button id="back-button" onclick="rewind()">Undo</button>
+            <button id="play-button" class="active" onclick="play()">Play</button>
+            <button id="reset-button" onclick="reset()">Reset</button>
+        </div>
+    </section>
+
     <div>
         <canvas id="board"></canvas>
     </div>
 
     <section>
-        <div id="buttons">
-            <button id="back-button" onclick="rewind()">Back</button>
-            <button id="play-button" onclick="play()">Play</button>
-            <button id="reset-button" onclick="reset()">Reset</button>
-        </div>
-
         <div id="options">
             <div class="player-options">
                 <div class="player-controls">
