@@ -82,6 +82,25 @@ canvas.addEventListener("click", event => {
     humanMove = Math.floor((event.clientX - rect.left) / cellWidth);
 });
 
+function rewind() {
+    if (moves.length == 0) return;
+
+    isPlaying = false;
+    
+    const icol = moves.pop();
+    heights[icol]--;
+    // if AI's move was popped
+    if (agentSelect[moves.length & 1].value != 'human') {
+        evaluations.pop();
+        elapsedTime.pop();
+    }
+
+    updateStats();
+    if (evaluations.length == 0) {
+        clearStats();
+    }
+}
+
 function play() {
     isPlaying = true;
 }

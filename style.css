@@ -75,7 +75,7 @@ button {
 #play-button {
     border: none;
     width: 100%;
-    margin-right: 0.2em;
+    margin: 0 0.2em;
     text-align: left;
     font-weight: 500;
     background-color: #eeeeee;
