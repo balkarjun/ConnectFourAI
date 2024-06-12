@@ -99,9 +99,9 @@ struct GameState {
     int evaluate() {
         // for each cell, add score for white and subtract score for black
         int score = 0;
+        #pragma unroll 48
         for (int idx = 0; idx <= 47; idx++) {
-            score += scoremap[idx] * ((bitboards[0] >> idx) & 1);
-            score -= scoremap[idx] * ((bitboards[1] >> idx) & 1);
+            score += scoremap[idx] * (((bitboards[0] >> idx) & 1) - ((bitboards[1] >> idx) & 1));
         }
         
         return score;
