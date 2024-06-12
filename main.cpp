@@ -6,7 +6,9 @@
 #endif
 
 #include <stdint.h>
-#include <emscripten.h>
+# if TARGET_WASM
+    #include <emscripten.h>
+#endif
 
 typedef uint64_t u64;
 /*
@@ -181,7 +183,7 @@ int get_minimax_move(GameState &board, int depth) {
 #if !TARGET_WASM
 int main() {
     GameState board;
-    int depths[2] = {8, 8};
+    int depths[2] = {11, 11};
 
     int end_score = -1;
     float total_time = 0;
