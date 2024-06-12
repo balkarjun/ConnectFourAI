@@ -8,6 +8,10 @@ const playButton = document.getElementById('play-button');
 const backButton = document.getElementById('back-button');
 const resetButton = document.getElementById('reset-button');
 
+function isTouchDevice() {
+    return window.matchMedia("(pointer: coarse)").matches;
+}
+
 function scaleCanvas() {
     // actual visual size (css)
     canvas.style.width = `${boardWidth}px`;
@@ -394,8 +398,8 @@ function updateStats() {
 function draw() {
     drawGrid();
     
-    // highlight next move
-    if (isPlaying && nextMove != -1 && heights[nextMove] < nrows) {
+    // highlight next move for non-touch devices
+    if (!isTouchDevice() && isPlaying && nextMove != -1 && heights[nextMove] < nrows) {
         const strokeStyle = ((moves.length & 1) == 0) ? coinRedFaded : coinYellowFaded;
         drawCoin(boardBg, strokeStyle, nrows - heights[nextMove] - 1, nextMove);
     }
