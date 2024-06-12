@@ -21,17 +21,16 @@ body {
 canvas {
     display: block;
     margin: 0.5em auto;
-    border: 2px solid var(--board-fg);
 }
 
 section {
-    max-width: 630px;
+    max-width: calc(630px + 1.6em);
     margin: 0 auto;
     padding: 0 0.8em;
 }
 
 footer {
-    max-width: 630px;
+    max-width: calc(630px + 1.6em);
     margin: 1em auto;
     padding: 0 0.8em;
     color: #666666;
@@ -97,10 +96,16 @@ button {
 #back-button, #reset-button {
     border: 1px solid #eeeeee;
     width: 5em;
+    color: #222222;
+}
+
+#back-button:disabled, #reset-button:disabled {
+    color: #bbbbbb;
 }
 
 #play-button {
     border: none;
+    color: #222222;
     width: 100%;
     margin: 0 0.4em;
     font-weight: 500;
@@ -158,6 +163,8 @@ button {
     border: 1px solid #eeeeee;
     border-radius: 2px;
     margin-left: 0.2em;
+    color: #222222;
+    background-color: white;
 }
 
 .player-statistics {
@@ -174,4 +181,13 @@ button {
     display: flex;
     color: #555555;
     justify-content: space-between;
+}
+
+#player-red-current, #player-yellow-current {
+    padding-right: 0.5em;
+}
+
+#player-red-total, #player-yellow-total {
+    text-align: end;
+    padding-left: 0.5em;
 }
