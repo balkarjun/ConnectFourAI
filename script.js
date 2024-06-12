@@ -111,6 +111,16 @@ function rewind() {
 
 function play() {
     isPlaying = true;
+
+    // scroll to game area
+    const fontSize = parseFloat(window.getComputedStyle(document.body, null).getPropertyValue('font-size'));
+    const margin = fontSize * 0.5; // the controls have a 0.5em margin
+    const offset = document.getElementById('buttons').offsetTop - margin;
+    
+    window.scrollTo({
+        top: offset,
+        behavior: 'smooth'
+    });
 }
 
 function makeMove(icol) {
