@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(Beta) Connect-Four AI</title>
+    <title>Connect Four AI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;1,100;1,200;1,300;1,400;1,500&family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
@@ -92,8 +92,8 @@
         <h3>Instructions</h3>
         <p>
             You can choose between two agents:<br>
-            <em>Human</em> – Make moves manually. Use this to play against a friend or the AI.<br>
-            <em>Minimax</em> – AI that uses the <a href="https://en.wikipedia.org/wiki/Minimax">minimax</a> algorithm with alpha-beta pruning. You can adjust the AI's strength by adjusting its search depth.
+            <strong>Human</strong>: Make moves manually. Use this to play against a friend or the AI.<br>
+            <strong>Minimax</strong>: AI that uses the minimax algorithm with alpha-beta pruning. You can adjust the AI's strength by adjusting its search depth.
         
             <ul>
                 <li>Very Easy (Depth 1) is very naive</li>
@@ -102,19 +102,23 @@
                 <li>Hard (Depth 11) is the slowest but also the strongest</li>
             </ul>
         </p>
+        
         <h3>Technical Details</h3>
-        <p>I wrote a whole <a href="#">blog post</a> on the techniques that went into making this AI.</p>
+        <p>I wrote a whole <a href="#" target="_blank">blog post</a> on the techniques that went into making this AI.</p>
         <p>
-            The UI was made using HTML, CSS and Javascript. 
-            JS was too slow for handling the AI logic since the minimax algorithm has to evaluate <em>millions</em> of positions before making a move.
-            A common solution is to write the AI in a more performant language and have it run on the server-side. But that requires, well, setting up a server.
+            Here's how it works: The AI looks at all the moves that it and its opponent can make, upto a certain depth. It evaluates each of the resulting positions to obtain a score indicating the player that is more likely to win. The AI picks the
+            move that maximizes its score.
         </p>
         <p>
-            Instead, the algorithm was written in C++ and compiled to WebAssembly using <a href="https://emscripten.org/">Emscripten</a>.
+            Javascript was too slow for handling this logic since the AI has to evaluate <em>millions</em> of positions before making a move.
+            A common solution is to write the AI in a more performant language and have it run on the server-side. But that requires setting up and managing a server.
+        </p>
+        <p>
+            Instead, I wrote the algorithm in C++ and compiled it to WebAssembly using <a href="https://emscripten.org/" target="_blank">Emscripten</a>.
             This allows C++ to run completely on the client-side, no server required!
-            The compiled <em>.wasm</em> file is only 2KB in size and is not much slower than running C++ natively. On Google Chrome running on my Apple M1 Macbook, the AI can evaluate ~20,000 positions in 1 millisecond.
+            The compiled Wasm file is only 2.6KB in size and is not much slower than running C++ natively. On Google Chrome running on my Apple M1 Macbook, the AI can evaluate ~30,000 positions in 1 millisecond.
         </p>
-        <p>This project is <a href="#">open source</a>. You can find more projects over at my <a href="">website</a>.</p>
+        <p>This project is <a href="#" target="_blank">open source</a>. You can find more of my projects on <a href="" target="_blank">my website</a>.</p>
     </section>
     <footer>
         © 2024 Arjun Balakrishnan
