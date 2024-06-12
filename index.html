@@ -6,83 +6,84 @@
     <title>Connect Four AI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;1,100;1,200;1,300;1,400;1,500&family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <section>
         <h1>Connect Four AI</h1>
-        <p>
-            An interactive Connect Four game with a powerful AI opponent. The AI uses a depth-limited minimax algorithm with alpha-beta pruning. 
-            It was written in C++ and compiled to WebAssembly resulting in a <em>blazingly fast</em> AI that can run locally on your browser.
-        </p>
+        <p>An interactive Connect Four game with a powerful AI opponent. The AI uses a depth-limited minimax algorithm with alpha-beta pruning. It was written in C++ and compiled to WebAssembly resulting in a <em>blazingly fast</em> AI that can run locally on your browser.</p>
     </section>
     
-    <section>
-        <div id="buttons">
-            <button id="back-button" onclick="rewind()">Undo</button>
-            <button id="play-button" class="active" onclick="play()">Play</button>
-            <button id="reset-button" onclick="reset()">Reset</button>
-        </div>
+    <section id="buttons">
+        <button id="button-back" onclick="rewind()">Undo</button>
+        <button id="button-play" onclick="play()" class="active">Play</button>
+        <button id="button-reset" onclick="reset()">Reset</button>
     </section>
 
-    <div>
-        <canvas id="board"></canvas>
-    </div>
+    <canvas id="board"></canvas>
 
     <section>
-        <div id="options">
-            <div class="player-options">
-                <div class="player-controls">
-                    <span>Player <strong style="color: #ce5454">Red</strong></span>
-                    <select class="hidden" name="player-one-depth-select" id="player-one-depth-select">
-                        <option value="1">Basic (1)</option>
-                        <option value="2">Easy (2)</option>
-                        <option selected value="5">Medium (5)</option>
-                        <option value="11">Hard (11)</option>
-                    </select>
+        <div class="player-bar">
+            <div id="player-one-controls">
+                <span>
+                    Player 
+                    <strong style="color: #ce5454">Red</strong>
+                </span>
 
-                    <select name="player-one-agent-select" id="player-one-agent-select">
-                        <option value="human">Human</option>
-                        <option value="minimax">Minimax</option>
-                    </select>
+                <select class="select-depth hidden">
+                    <option value="1">Basic (1)</option>
+                    <option value="2">Easy (2)</option>
+                    <option selected value="5">Medium (5)</option>
+                    <option value="11">Hard (11)</option>
+                </select>
+
+                <select class="select-agent">
+                    <option value="human">Human</option>
+                    <option value="minimax">Minimax</option>
+                </select>
+            </div>
+
+            <div id="player-one-stats" class="hidden">
+                <div>
+                    <strong>Current</strong>
+                    <strong>Total</strong>
                 </div>
-                <div class="player-statistics hidden">
-                    <div>
-                        <strong>Current</strong>
-                        <strong>Total</strong>
-                    </div>
-                    <div>
-                        <span id="player-red-current"></span>
-                        <span id="player-red-total"></span>
-                    </div>
+                <div>
+                    <span class="stat-current"></span>
+                    <span class="stat-total"></span>
                 </div>
             </div>
-            
-            <div class="player-options">
-                <div class="player-controls">
-                    <span>Player <strong style="color: #c3a343">Yellow</strong></span>
-                    <select name="player-two-depth-select" id="player-two-depth-select">
-                        <option value="1">Basic (1)</option>
-                        <option value="2">Easy (2)</option>
-                        <option selected value="5">Medium (5)</option>
-                        <option value="11">Hard (11)</option>
-                    </select>
+        </div>
+        
+        <div class="player-bar">
+            <div id="player-two-controls">
+                <span>
+                    Player 
+                    <strong style="color: #c3a343">Yellow</strong>
+                </span>
 
-                    <select name="player-two-agent-select" id="player-two-agent-select">
-                        <option value="human">Human</option>
-                        <option value="minimax" selected>Minimax</option>
-                    </select>
+                <select class="select-depth">
+                    <option value="1">Basic (1)</option>
+                    <option value="2">Easy (2)</option>
+                    <option selected value="5">Medium (5)</option>
+                    <option value="11">Hard (11)</option>
+                </select>
+
+                <select class="select-agent">
+                    <option value="human">Human</option>
+                    <option value="minimax" selected>Minimax</option>
+                </select>
+            </div>
+
+            <div id="player-two-stats" class="hidden">
+                <div>
+                    <strong>Current</strong>
+                    <strong>Total</strong>
                 </div>
-                <div class="player-statistics hidden">
-                    <div>
-                        <strong>Current</strong>
-                        <strong>Total</strong>
-                    </div>
-                    <div>
-                        <span id="player-yellow-current"></span>
-                        <span id="player-yellow-total"></span>
-                    </div>
+                <div>
+                    <span class="stat-current"></span>
+                    <span class="stat-total"></span>
                 </div>
             </div>
         </div>
@@ -105,24 +106,14 @@
         
         <h3>Technical Details</h3>
         <p>I wrote a whole <a href="#" target="_blank">blog post</a> on the techniques that went into making this AI.</p>
-        <p>
-            Here's how it works: The AI looks at all the moves that it and its opponent can make, upto a certain depth. It evaluates each of the resulting positions to obtain a score indicating the player that is more likely to win. The AI picks the
-            move that maximizes its score.
-        </p>
-        <p>
-            Javascript was too slow for handling this logic since the AI has to evaluate <em>millions</em> of positions before making a move.
-            A common solution is to write the AI in a more performant language and have it run on the server-side. But that requires setting up and managing a server.
-        </p>
-        <p>
-            Instead, I wrote the algorithm in C++ and compiled it to WebAssembly using <a href="https://emscripten.org/" target="_blank">Emscripten</a>.
-            This allows C++ to run completely on the client-side, no server required!
-            The compiled Wasm file is only 2.6KB in size and is not much slower than running C++ natively. On Google Chrome running on my Apple M1 Macbook, the AI can evaluate ~30,000 positions in 1 millisecond.
-        </p>
+        <p>Here's how it works: The AI looks at all the moves that it and its opponent can make, upto a certain depth. It evaluates each of the resulting positions to obtain a score indicating the player that is more likely to win. The AI picks the move that maximizes its score.</p>
+        <p>Javascript was too slow for handling this logic since the AI has to evaluate <em>millions</em> of positions before making a move. A common solution is to write the AI in a more performant language and have it run on the server-side. But that requires setting up and managing a server.</p>
+        <p>Instead, I wrote the algorithm in C++ and compiled it to WebAssembly using <a href="https://emscripten.org/" target="_blank">Emscripten</a>. This allows C++ to run completely on the client-side, no server required! The compiled Wasm file is only 2.6KB in size and is not much slower than running C++ natively. On Google Chrome running on my Apple M1 Macbook, the AI can evaluate ~30,000 positions in 1 millisecond.</p>
         <p>This project is <a href="#" target="_blank">open source</a>. You can find more of my projects on <a href="" target="_blank">my website</a>.</p>
     </section>
-    <footer>
-        © 2024 Arjun Balakrishnan
-    </footer>
+    
+    <footer>© 2024 Arjun Balakrishnan</footer>
+    
     <script src="script.js"></script>
 </body>
 </html>

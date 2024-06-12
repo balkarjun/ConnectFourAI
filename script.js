@@ -4,9 +4,30 @@ const boardHeight = (boardWidth * 6)/7;
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 
-const playButton = document.getElementById('play-button');
-const backButton = document.getElementById('back-button');
-const resetButton = document.getElementById('reset-button');
+const backButton = document.getElementById('button-back');
+const playButton = document.getElementById('button-play');
+const resetButton = document.getElementById('button-reset');
+
+const playerStats = [
+    document.getElementById('player-one-stats'),
+    document.getElementById('player-two-stats')
+];
+
+const redCurrent = document.querySelector('#player-one-stats .stat-current');
+const redTotal = document.querySelector('#player-one-stats .stat-total');
+
+const yellowCurrent = document.querySelector('#player-two-stats .stat-current');
+const yellowTotal = document.querySelector('#player-two-stats .stat-total');
+
+const agentSelect = [
+    document.querySelector('#player-one-controls .select-agent'),
+    document.querySelector('#player-two-controls .select-agent')
+];
+
+const depthSelect = [
+    document.querySelector('#player-one-controls .select-depth'),
+    document.querySelector('#player-two-controls .select-depth')
+];
 
 function isTouchDevice() {
     return window.matchMedia("(pointer: coarse)").matches;
@@ -60,36 +81,6 @@ let humanMove = -1;
 let evaluations = [];
 let elapsedTime = [];
 
-function reset() {
-    moves = [];
-    heights = [0, 0, 0, 0, 0, 0, 0];
-    isPlaying = false;
-    nextMove = -1;
-    humanMove = -1;
-
-    evaluations = [];
-    elapsedTime = [];
-    clearStats();
-}
-
-canvas.addEventListener("mousemove", event => {
-    // ensure next move's agent is human
-    if (!isPlaying || agentSelect[moves.length & 1].value != 'human') {
-        nextMove = -1;
-        return;
-    }
-    // get column index from mouse pointer location
-    const rect = canvas.getBoundingClientRect();
-    nextMove = Math.floor((event.clientX - rect.left) / cellWidth);
-});
-
-canvas.addEventListener("click", event => {
-    if (!isPlaying) return;
-    // get column index from click location
-    const rect = canvas.getBoundingClientRect();
-    humanMove = Math.floor((event.clientX - rect.left) / cellWidth);
-});
-
 function rewind() {
     if (moves.length == 0) return;
 
@@ -122,6 +113,36 @@ function play() {
         behavior: 'smooth'
     });
 }
+
+function reset() {
+    moves = [];
+    heights = [0, 0, 0, 0, 0, 0, 0];
+    isPlaying = false;
+    nextMove = -1;
+    humanMove = -1;
+
+    evaluations = [];
+    elapsedTime = [];
+    clearStats();
+}
+
+canvas.addEventListener("mousemove", event => {
+    // ensure next move's agent is human
+    if (!isPlaying || agentSelect[moves.length & 1].value != 'human') {
+        nextMove = -1;
+        return;
+    }
+    // get column index from mouse pointer location
+    const rect = canvas.getBoundingClientRect();
+    nextMove = Math.floor((event.clientX - rect.left) / cellWidth);
+});
+
+canvas.addEventListener("click", event => {
+    if (!isPlaying) return;
+    // get column index from click location
+    const rect = canvas.getBoundingClientRect();
+    humanMove = Math.floor((event.clientX - rect.left) / cellWidth);
+});
 
 function makeMove(icol) {
     // ensure the move is valid
@@ -236,15 +257,6 @@ function getEvaluations() {
 /* WASM END */
 
 /* UI Controls START */
-const agentSelect = [
-    document.getElementById('player-one-agent-select'),
-    document.getElementById('player-two-agent-select')
-];
-
-const depthSelect = [
-    document.getElementById('player-one-depth-select'),
-    document.getElementById('player-two-depth-select')
-];
 
 for (let p = 0; p <= 1; p++) {
     agentSelect[p].addEventListener('change', function() {
@@ -281,14 +293,14 @@ function update() {
 
     if (isPlaying) {
         playButton.classList.remove('active');
-        playButton.classList.remove('win-yellow');
-        playButton.classList.remove('win-red');
+        playButton.classList.remove('win-two');
+        playButton.classList.remove('win-one');
 
         playButton.innerText = (moves.length % 2 == 0) ? "Red's Turn" : "Yellow's Turn";
     } else {
         playButton.classList.add('active');
-        playButton.classList.remove('win-yellow');
-        playButton.classList.remove('win-red');
+        playButton.classList.remove('win-two');
+        playButton.classList.remove('win-one');
 
         playButton.innerText = "Play";
 
@@ -300,13 +312,13 @@ function update() {
             } else if (winner == 'red') {
                 playButton.innerText = 'Red Won';
                 playButton.classList.remove('active');
-                playButton.classList.remove('win-yellow');
-                playButton.classList.add('win-red');
+                playButton.classList.remove('win-two');
+                playButton.classList.add('win-one');
             } else if (winner == 'yellow') {
                 playButton.innerText = 'Yellow Won';
                 playButton.classList.remove('active');
-                playButton.classList.remove('win-red');
-                playButton.classList.add('win-yellow');
+                playButton.classList.remove('win-one');
+                playButton.classList.add('win-two');
             }
         }
     }
@@ -338,14 +350,10 @@ function update() {
 }
 
 function clearStats() {
-    document.querySelectorAll('.player-statistics').forEach(element => {
-        element.classList.add('hidden');
-    });
+    playerStats.forEach(element => element.classList.add('hidden'));
 }
 
 function updateStats() {
-    const statistics = document.querySelectorAll('.player-statistics');
-
     function getCurrentText(evals, times) {
         const formatter = Intl.NumberFormat('en');
 
@@ -370,28 +378,22 @@ function updateStats() {
         return `${formatter.format(totalEval)} evals | ${formatter.format(totalTime)} ms`;
     }
 
-    const redCurrent = document.getElementById('player-red-current');
-    const redTotal = document.getElementById('player-red-total');
-
-    const yellowCurrent = document.getElementById('player-yellow-current');
-    const yellowTotal = document.getElementById('player-yellow-total');
-
     // red is AI, yellow is human
     if (agentSelect[0].value == 'minimax' && agentSelect[1].value == 'human') {
-        statistics[0].classList.remove('hidden');
+        playerStats[0].classList.remove('hidden');
         redCurrent.innerText = getCurrentText(evaluations, elapsedTime);
         redTotal.innerText = getTotalText(evaluations, elapsedTime);
     } 
     // red is human, yellow is AI
     else if (agentSelect[0].value == 'human' && agentSelect[1].value == 'minimax') {
-        statistics[1].classList.remove('hidden');
+        playerStats[1].classList.remove('hidden');
         yellowCurrent.innerText = getCurrentText(evaluations, elapsedTime);
         yellowTotal.innerHTML = getTotalText(evaluations, elapsedTime);
     }
     // both AI
     else {
-        statistics[0].classList.remove('hidden');
-        statistics[1].classList.remove('hidden');
+        playerStats[0].classList.remove('hidden');
+        playerStats[1].classList.remove('hidden');
         // elements at even indices
         const redEvals = evaluations.filter((_, idx) => (idx % 2) == 0);
         const redTimes = elapsedTime.filter((_, idx) => (idx % 2) == 0);
