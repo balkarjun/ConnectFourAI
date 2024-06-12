@@ -25,13 +25,13 @@ canvas {
 }
 
 section {
-    width: 630px;
+    max-width: 630px;
     margin: 0 auto;
     padding: 0 0.8em;
 }
 
 footer {
-    width: 630px;
+    max-width: 630px;
     margin: 1em auto;
     padding: 0 0.8em;
     color: #666666;

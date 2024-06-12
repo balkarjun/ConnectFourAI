@@ -1,5 +1,5 @@
-const boardWidth = 630;
-const boardHeight = 540;
+const boardWidth = Math.min(630, screen.width);
+const boardHeight = (boardWidth * 6)/7;
 
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
@@ -28,7 +28,7 @@ scaleCanvas();
 const nrows = 6;
 const ncols = 7;
 
-const lineWidth = 4;
+const lineWidth = boardWidth * 0.007;
 
 const cellWidth = (boardWidth - lineWidth)/ncols;
 const cellHeight = (boardHeight - lineWidth)/nrows;
