@@ -105,11 +105,11 @@
         </p>
         
         <h3>Technical Details</h3>
-        <p>I wrote a whole <a href="#" target="_blank">blog post</a> on the techniques that went into making this AI.</p>
+        <p>I wrote a whole <a href="https://balkarjun.github.io/blog/minimax-connect-four/" target="_blank">blog post</a> on the techniques that went into making this AI.</p>
         <p>Here's how it works: The AI looks at all the moves that it and its opponent can make, upto a certain depth. It evaluates each of the resulting positions to obtain a score indicating the player that is more likely to win. The AI picks the move that maximizes its score.</p>
         <p>Javascript was too slow for handling this logic since the AI has to evaluate <em>millions</em> of positions before making a move. A common solution is to write the AI in a more performant language and have it run on the server-side. But that requires setting up and managing a server.</p>
         <p>Instead, I wrote the algorithm in C++ and compiled it to WebAssembly using <a href="https://emscripten.org/" target="_blank">Emscripten</a>. This allows C++ to run completely on the client-side, no server required! The compiled Wasm file is only 2.6KB in size and is not much slower than running C++ natively. On Google Chrome running on my Apple M1 Macbook, the AI can evaluate ~30,000 positions in 1 millisecond.</p>
-        <p>This project is <a href="#" target="_blank">open source</a>. You can find more of my projects on <a href="" target="_blank">my website</a>.</p>
+        <p>This project is <a href="https://github.com/balkarjun/ConnectFourAI/" target="_blank">open source</a>. You can find more of my projects on <a href="https://balkarjun.github.io/" target="_blank">my website</a>.</p>
     </section>
     
     <footer>© 2024 Arjun Balakrishnan</footer>
