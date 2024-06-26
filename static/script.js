@@ -13,11 +13,15 @@ const playerStats = [
     document.getElementById('player-two-stats')
 ];
 
-const redCurrent = document.querySelector('#player-one-stats .stat-current');
-const redTotal = document.querySelector('#player-one-stats .stat-total');
+const statCurrent = [
+    document.querySelector('#player-one-stats .stat-current'),
+    document.querySelector('#player-two-stats .stat-current')
+];
 
-const yellowCurrent = document.querySelector('#player-two-stats .stat-current');
-const yellowTotal = document.querySelector('#player-two-stats .stat-total');
+const statTotal = [
+    document.querySelector('#player-one-stats .stat-total'),
+    document.querySelector('#player-two-stats .stat-total')
+];
 
 const agentSelect = [
     document.querySelector('#player-one-controls .select-agent'),
@@ -354,56 +358,46 @@ function clearStats() {
 }
 
 function updateStats() {
-    function getCurrentText(evals, times) {
+    function formatText(eval, time) {
         const formatter = Intl.NumberFormat('en');
+        
+        const evalText = `${formatter.format(eval)} evals`;
+        const timeText = (time < 1) ? '<1 ms' : `${formatter.format(Math.round(time))} ms`;
 
-        const currentEval = evals[evals.length - 1];
-        const currentTime = Math.round(times[times.length - 1]);
+        return `${evalText} | ${timeText}`;
+    }
 
-        if (currentTime < 1) {
-            return `${formatter.format(currentEval)} evals | <1 ms`;
+    let evals = [[], []];
+    let times = [[], []];
+
+    if (agentSelect[0].value == 'minimax' && agentSelect[1].value == 'minimax') {
+        // both players are AI
+        for (let idx = 0; idx < evaluations.length; idx++) {
+            evals[idx % 2].push(evaluations[idx]);
+            times[idx % 2].push(elapsedTime[idx]);
         }
-        return `${formatter.format(currentEval)} evals | ${formatter.format(currentTime)} ms`;
+    } else if (agentSelect[0].value == 'minimax') {
+        // red is AI
+        evals[0] = evaluations;
+        times[0] = elapsedTime;
+    } else if (agentSelect[1].value == 'minimax') {
+        // yellow is AI
+        evals[1] = evaluations;
+        times[1] = elapsedTime;
     }
 
-    function getTotalText(evals, times) {
-        const formatter = Intl.NumberFormat('en');
-
-        const totalEval = evals.reduce((a, b) => a + b, 0);
-        const totalTime = Math.round(times.reduce((a, b) => a + b, 0));
-
-        if (totalTime < 1) {
-            return `${formatter.format(totalEval)} evals | <1 ms`;
+    for (let p = 0; p <= 1; p++) {
+        if (agentSelect[p].value == 'minimax') {
+            playerStats[p].classList.remove('hidden');
         }
-        return `${formatter.format(totalEval)} evals | ${formatter.format(totalTime)} ms`;
-    }
+        
+        const currentEval = evals[p][evals[p].length - 1];
+        const currentTime = times[p][times[p].length - 1];
+        statCurrent[p].innerText = formatText(currentEval, currentTime);
 
-    // red is AI, yellow is human
-    if (agentSelect[0].value == 'minimax' && agentSelect[1].value == 'human') {
-        playerStats[0].classList.remove('hidden');
-        redCurrent.innerText = getCurrentText(evaluations, elapsedTime);
-        redTotal.innerText = getTotalText(evaluations, elapsedTime);
-    } 
-    // red is human, yellow is AI
-    else if (agentSelect[0].value == 'human' && agentSelect[1].value == 'minimax') {
-        playerStats[1].classList.remove('hidden');
-        yellowCurrent.innerText = getCurrentText(evaluations, elapsedTime);
-        yellowTotal.innerHTML = getTotalText(evaluations, elapsedTime);
-    }
-    // both AI
-    else {
-        playerStats[0].classList.remove('hidden');
-        playerStats[1].classList.remove('hidden');
-        // elements at even indices
-        const redEvals = evaluations.filter((_, idx) => (idx % 2) == 0);
-        const redTimes = elapsedTime.filter((_, idx) => (idx % 2) == 0);
-        redCurrent.innerText = getCurrentText(redEvals, redTimes);
-        redTotal.innerText = getTotalText(redEvals, redTimes);
-        // elements at odd indices
-        const yellowEvals = evaluations.filter((_, idx) => (idx % 2) == 1);
-        const yellowTimes = elapsedTime.filter((_, idx) => (idx % 2) == 1);
-        yellowCurrent.innerText = getCurrentText(yellowEvals, yellowTimes);
-        yellowTotal.innerHTML = getTotalText(yellowEvals, yellowTimes);
+        const totalEval = evals[p].reduce((a, b) => a + b, 0);
+        const totalTime = times[p].reduce((a, b) => a + b, 0);
+        statTotal[p].innerText = formatText(totalEval, totalTime);
     }
 }
 
