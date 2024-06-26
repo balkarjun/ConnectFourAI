@@ -1,7 +1,9 @@
 :root {
     --blue: #0273b2;
     --blue-subtle: #dff4ff;
-    --board-fg: #3980a0;
+    --fg-red: #c0392b;
+    --fg-yellow-dark: #8d6b14;
+    --fg-yellow-light: #c3a343;
 }
 
 * {
@@ -86,7 +88,6 @@ button {
     border: none;
     font: inherit;
     cursor: pointer;
-    font-weight: 400;
     padding: 0.4em 1em;
     border-radius: 3px;
     font-weight: 500;
@@ -112,27 +113,33 @@ button {
     color: #222222;
     width: 100%;
     margin: 0 0.4em;
-    font-weight: 500;
+    font-weight: 600;
+    background-color: #f4f4f4;
     border: 1px solid #eeeeee;
-    background-color: #eeeeee88;
 }
 
 #button-play.active {
-    color: var(--blue);
-    background-color: #0273b222;
-    border: 1px solid #0273b222;
+    color: #005582;
+    background-color: #eef7ff;
+    border: 1px solid #cfe5ee;
 }
 
 #button-play.win-one {
-    color: #ce5454;
-    background-color: #ce545422;
-    border: 1px solid #ce545422;
+    color: var(--fg-red);
+    background-color: white;
 }
 
 #button-play.win-two {
-    color: #c5953b;
-    background-color: #dfc35236;
-    border: 1px solid #dfc35236;
+    color: var(--fg-yellow-dark);
+    background-color: white;
+}
+
+.fg-yellow {
+    color: var(--fg-yellow-light);
+}
+
+.fg-red {
+    color: var(--fg-red);
 }
 
 .hidden {
@@ -154,6 +161,10 @@ button {
     margin-left: 0.2em;
     color: #222222;
     background-color: white;
+}
+
+.player-bar select[disabled] {
+    opacity: 0;
 }
 
 .player-bar span strong {

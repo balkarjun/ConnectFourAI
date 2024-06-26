@@ -262,9 +262,9 @@ for (let p = 0; p <= 1; p++) {
     agentSelect[p].addEventListener('change', function() {
         // show depth select if minimax
         if (this.value == 'minimax') {
-            depthSelect[p].classList.remove('hidden');
+            depthSelect[p].removeAttribute('disabled');
         } else {
-            depthSelect[p].classList.add('hidden');
+            depthSelect[p].setAttribute('disabled', true);
         }
     });
 }

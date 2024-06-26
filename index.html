@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An interactive Connect Four game with a powerful AI opponent.">
     <title>Connect Four AI</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -24,18 +25,18 @@
         <div class="player-bar">
             <div id="player-one-controls">
                 <span>
-                    Player 
-                    <strong style="color: #ce5454">Red</strong>
+                    Player <strong>Red</strong>
+                    <span class="fg-red">◉</span>
                 </span>
 
-                <select class="select-depth hidden">
+                <select aria-label="Player Red Search Depth" class="select-depth" disabled>
                     <option value="1">Basic (1)</option>
                     <option value="2">Easy (2)</option>
                     <option selected value="5">Medium (5)</option>
                     <option value="11">Hard (11)</option>
                 </select>
 
-                <select class="select-agent">
+                <select aria-label="Player Red Agent" class="select-agent">
                     <option value="human">Human</option>
                     <option value="minimax">Minimax</option>
                 </select>
@@ -56,18 +57,18 @@
         <div class="player-bar">
             <div id="player-two-controls">
                 <span>
-                    Player 
-                    <strong style="color: #c3a343">Yellow</strong>
+                    Player <strong>Yellow</strong>
+                    <span class="fg-yellow">◉</span>
                 </span>
 
-                <select class="select-depth">
+                <select aria-label="Player Yellow Search Depth" class="select-depth">
                     <option value="1">Basic (1)</option>
                     <option value="2">Easy (2)</option>
                     <option selected value="5">Medium (5)</option>
                     <option value="11">Hard (11)</option>
                 </select>
 
-                <select class="select-agent">
+                <select aria-label="Player Yellow Agent" class="select-agent">
                     <option value="human">Human</option>
                     <option value="minimax" selected>Minimax</option>
                 </select>
@@ -105,7 +106,7 @@
         <p>I wrote a whole <a href="https://balkarjun.github.io/blog/minimax-connect-four/" target="_blank">blog post</a> on the techniques that went into making this AI.</p>
         <p>Here's how it works: The AI looks at all the moves that it and its opponent can make, upto a certain depth. It evaluates each of the resulting positions to obtain a score indicating the player that is more likely to win. The AI picks the move that maximizes its score.</p>
         <p>Javascript was too slow for handling this logic since the AI has to evaluate <em>millions</em> of positions before making a move. A common solution is to write the AI in a more performant language and have it run on the server-side. But that requires setting up and managing a server.</p>
-        <p>Instead, I wrote the algorithm in C++ and compiled it to WebAssembly using <a href="https://emscripten.org/" target="_blank">Emscripten</a>. This allows C++ to run completely on the client-side, no server required! The compiled Wasm file is only 2.6KB in size and is not much slower than running C++ natively. On Google Chrome running on my Apple M1 Macbook, the AI can evaluate ~30,000 positions in 1 millisecond.</p>
+        <p>Instead, I wrote the algorithm in C++ and compiled it to WebAssembly using <a href="https://emscripten.org/" target="_blank">Emscripten</a>. This allows the code to run completely on the client-side, no server required! The compiled Wasm file is only 2.6KB in size and is not much slower than running C++ natively. On Google Chrome running on my Apple M1 Macbook, the AI can evaluate ~30,000 positions in 1 millisecond.</p>
         <p>This project is <a href="https://github.com/balkarjun/ConnectFourAI/" target="_blank">open source</a>. You can find more of my projects on <a href="https://balkarjun.github.io/" target="_blank">my website</a>.</p>
     </section>
     
