@@ -4,10 +4,10 @@ output="app" # output name for native executable
 if [ "$1" = "release" ]; then
     if [ "$2" = "wasm" ]; then
         echo "release build for wasm target"
-        build_command="em++ -O2 $file -o main.js"
+        build_command="em++ -O2 $file -o static/main.js"
         
         echo $build_command
-        $build_command && rm "main.js" # we only need the .wasm file, not the .js file
+        $build_command && rm "static/main.js" # we only need the .wasm file, not the .js file
 
     elif [ "$2" = "native" ]; then
         echo "release build for native target"
@@ -22,10 +22,10 @@ if [ "$1" = "release" ]; then
 elif [ "$1" = "debug" ]; then
     if [ "$2" = "wasm" ]; then
         echo "debug build for wasm target"
-        build_command="em++ $file -o main.js"
+        build_command="em++ $file -o static/main.js"
 
         echo $build_command
-        $build_command && rm "main.js" # we only need the .wasm file, not the .js file      
+        $build_command && rm "static/main.js" # we only need the .wasm file, not the .js file      
 
     elif [ "$2" = "native" ]; then
         echo "debug build for native target"
