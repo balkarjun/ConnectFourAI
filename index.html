@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connect Four AI</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -90,7 +87,7 @@
     </section>
 
     <section>
-        <h3>Instructions</h3>
+        <h2>Instructions</h2>
         <p>
             You can choose between two agents:<br>
             <strong>Human</strong>: Make moves manually. Use this to play against a friend or the AI.<br>
@@ -104,7 +101,7 @@
             </ul>
         </p>
         
-        <h3>Technical Details</h3>
+        <h2>Technical Details</h2>
         <p>I wrote a whole <a href="https://balkarjun.github.io/blog/minimax-connect-four/" target="_blank">blog post</a> on the techniques that went into making this AI.</p>
         <p>Here's how it works: The AI looks at all the moves that it and its opponent can make, upto a certain depth. It evaluates each of the resulting positions to obtain a score indicating the player that is more likely to win. The AI picks the move that maximizes its score.</p>
         <p>Javascript was too slow for handling this logic since the AI has to evaluate <em>millions</em> of positions before making a move. A common solution is to write the AI in a more performant language and have it run on the server-side. But that requires setting up and managing a server.</p>
