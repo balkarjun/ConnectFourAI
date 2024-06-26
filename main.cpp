@@ -1,16 +1,17 @@
+// set this to 0 when building for native target
 #define TARGET_WASM 1
 
-#if !TARGET_WASM
+#if TARGET_WASM
+    #include <emscripten.h>
+#else
     #include <stdio.h>
     #include <time.h>
 #endif
 
 #include <stdint.h>
-# if TARGET_WASM
-    #include <emscripten.h>
-#endif
 
 typedef uint64_t u64;
+
 /*
   6 13 20 27 34 41 48   55 62
  ---------------------
@@ -180,67 +181,65 @@ int get_minimax_move(GameState &board, int depth) {
     return best_move;
 }
 
-#if !TARGET_WASM
-int main() {
-    GameState board;
-    int depths[2] = {11, 11};
-
-    int end_score = -1;
-    float total_time = 0;
-    while (end_score == -1) {
-        // board.display();
-        clock_t start = clock();
-
-        int move = get_minimax_move(board, depths[board.counter & 1]);
-        
-        clock_t end = clock();
-        float seconds = (float)(end - start) / CLOCKS_PER_SEC;
-        total_time += seconds;
-
-        printf("%d, %.4fs\n", move + 1, seconds);
-        board.make_move(move);
-
-        end_score = board.end_state_reached();
-    }
-
-    board.display();
-    printf("Total Time: %.3fs\n\n", total_time);
-
-    if (end_score == 0) {
-        printf("It's a Tie\n");
-    } else if (end_score > 0) {
-        printf("White (●) Won!\n");
-    } else {
-        printf("Black (○) Won!\n");
-    }
-}
-#endif
-
 #if TARGET_WASM
-extern "C" {
-    EMSCRIPTEN_KEEPALIVE 
-    int getMinimaxMove(int *moves, int length, int depth) {
-        GameState board;
-        for (int i = 0; i < length; i++) {
-            board.make_move(moves[i]);
+    extern "C" {
+        EMSCRIPTEN_KEEPALIVE
+        int getMinimaxMove(int *moves, int length, int depth) {
+            GameState board;
+            for (int i = 0; i < length; i++) {
+                board.make_move(moves[i]);
+            }
+
+            return get_minimax_move(board, depth);
         }
 
-        return get_minimax_move(board, depth);
-    }
+        EMSCRIPTEN_KEEPALIVE
+        int endStateReached(int *moves, int length) {
+            GameState board;
+            for (int i = 0; i < length; i++) {
+                board.make_move(moves[i]);
+            }
 
-    EMSCRIPTEN_KEEPALIVE
-    int endStateReached(int *moves, int length) {
-        GameState board;
-        for (int i = 0; i < length; i++) {
-            board.make_move(moves[i]);
+            return board.end_state_reached();
         }
 
-        return board.end_state_reached();
+        EMSCRIPTEN_KEEPALIVE
+        int getEvaluations() {
+            return evaluations;
+        }
     }
+#else
+    int main() {
+        GameState board;
+        int depths[2] = {11, 11};
 
-    EMSCRIPTEN_KEEPALIVE
-    int getEvaluations() {
-        return evaluations;
+        int end_score = -1;
+        float total_time = 0;
+        while (end_score == -1) {
+            // board.display();
+            clock_t start = clock();
+
+            int move = get_minimax_move(board, depths[board.counter & 1]);
+            
+            clock_t end = clock();
+            float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+            total_time += seconds;
+
+            printf("%d, %.4fs\n", move + 1, seconds);
+            board.make_move(move);
+
+            end_score = board.end_state_reached();
+        }
+
+        board.display();
+        printf("Total Time: %.3fs\n\n", total_time);
+
+        if (end_score == 0) {
+            printf("It's a Tie\n");
+        } else if (end_score > 0) {
+            printf("White (●) Won!\n");
+        } else {
+            printf("Black (○) Won!\n");
+        }
     }
-}
 #endif
