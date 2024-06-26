@@ -215,7 +215,7 @@ let memory = new WebAssembly.Memory({
 });
 
 let core;
-WebAssembly.instantiateStreaming(fetch('main.wasm'), {
+WebAssembly.instantiateStreaming(fetch('static/main.wasm'), {
     js: { mem: memory }
 }).then(results => {
     core = results.instance.exports;
