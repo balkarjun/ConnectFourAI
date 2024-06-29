@@ -1,8 +1,8 @@
 const boardWidth = Math.min(630, screen.width);
 const boardHeight = (boardWidth * 6)/7;
 
-const canvas = document.getElementById("board");
-const ctx = canvas.getContext("2d");
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
 
 const backButton = document.getElementById('button-back');
 const playButton = document.getElementById('button-play');
@@ -34,7 +34,7 @@ const depthSelect = [
 ];
 
 function isTouchDevice() {
-    return window.matchMedia("(pointer: coarse)").matches;
+    return window.matchMedia('(pointer: coarse)').matches;
 }
 
 function scaleCanvas() {
@@ -130,87 +130,6 @@ function reset() {
     clearStats();
 }
 
-canvas.addEventListener("mousemove", event => {
-    // ensure next move's agent is human
-    if (!isPlaying || agentSelect[moves.length & 1].value != 'human') {
-        nextMove = -1;
-        return;
-    }
-    // get column index from mouse pointer location
-    const rect = canvas.getBoundingClientRect();
-    nextMove = Math.floor((event.clientX - rect.left) / cellWidth);
-});
-
-canvas.addEventListener("click", event => {
-    if (!isPlaying) return;
-    // get column index from click location
-    const rect = canvas.getBoundingClientRect();
-    humanMove = Math.floor((event.clientX - rect.left) / cellWidth);
-});
-
-function makeMove(icol) {
-    // ensure the move is valid
-    if (!isPlaying || heights[icol] >= nrows) return;
-
-    moves.push(icol);
-    heights[icol]++;
-}
-
-// draw the empty board
-function drawGrid() {
-    ctx.fillStyle = boardFg;
-
-    ctx.fillRect(0, 0, boardWidth, boardHeight);
-    
-    ctx.fillStyle = boardBg;
-    ctx.strokeStyle = boardFg;
-    ctx.lineWidth = lineWidth;
-    
-    for (let irow = 0; irow < nrows; irow++) {
-        const circleY = (irow + 1) * cellHeight - radius + lineWidth/2;
-
-        for (let icol = 0; icol < ncols; icol++) {
-            const circleX = (icol + 1) * cellWidth - radius + lineWidth/2;
-
-            ctx.beginPath();
-            ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.stroke();
-            ctx.closePath();
-        }
-    }
-}
-
-function drawCoin(fillStyle, strokeStyle, irow, icol) {
-    ctx.fillStyle = fillStyle;
-    ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = lineWidth;
-
-    ctx.beginPath();
-    const coinX = (icol + 1) * cellWidth - radius + lineWidth/2;
-    const coinY = (irow + 1) * cellHeight - radius + lineWidth/2;
-
-    ctx.arc(coinX, coinY, radius - 2 * lineWidth, 0, 2 * Math.PI);
-
-    ctx.fill();
-    ctx.stroke();
-    ctx.closePath();
-}
-
-function drawWinToken(irow, icol) {
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = lineWidth * 2;
-
-    ctx.beginPath();
-    const coinX = (icol + 1) * cellWidth - radius + lineWidth/2;
-    const coinY = (irow + 1) * cellHeight - radius + lineWidth/2;
-
-    ctx.arc(coinX, coinY, cellWidth/4, 0, 2 * Math.PI);
-
-    ctx.stroke();
-    ctx.closePath();
-}
-
 /* WASM START */
 // allocate memory for moves array
 let memory = new WebAssembly.Memory({
@@ -233,15 +152,6 @@ function getMinimaxMove(depth) {
     return core.getMinimaxMove(array.byteOffset, moves.length, depth);
 }
 
-function endStateReached() {
-    const array = new Int32Array(memory.buffer, 0, moves.length);
-    array.set(moves);
-
-    const result = core.endStateReached(array.byteOffset, moves.length);
-
-    return result != -1;
-}
-
 function getWinner() {
     if (moves.length == 0) return 'none';
 
@@ -262,11 +172,9 @@ function getEvaluations() {
 }
 /* WASM END */
 
-/* UI Controls START */
-
+// show depth-select when minimax agent is selected
 for (let p = 0; p <= 1; p++) {
     agentSelect[p].addEventListener('change', function() {
-        // show depth select if minimax
         if (this.value == 'minimax') {
             depthSelect[p].removeAttribute('disabled');
         } else {
@@ -274,76 +182,31 @@ for (let p = 0; p <= 1; p++) {
         }
     });
 }
-/* UI Controls END */
 
-/* Game Loop */
-
-// request the first frame
-window.requestAnimationFrame(gameLoop);
-function gameLoop(timeStamp) {
-    update();
-    draw();
-
-    // request the next frame
-    window.requestAnimationFrame(gameLoop);
-}
-
-function update() {
-    if (moves.length == 0) {
-        backButton.setAttribute('disabled', true);
-        resetButton.setAttribute('disabled', true);
-    } else {
-        backButton.removeAttribute('disabled');
-        resetButton.removeAttribute('disabled');
-    }
-
-    playButton.classList.remove('active');
-    playButton.classList.remove('win-two');
-    playButton.classList.remove('win-one');
-
-    if (isPlaying) {
-        playButton.innerText = (moves.length % 2 == 0) ? 'Red\'s Turn' : 'Yellow\'s Turn';
-    } else {
-        const winner = getWinner();
-
-        if (winner == 'tie') {
-            playButton.innerText = 'It\'s a Tie';
-        } else if (winner == 'red') {
-            playButton.innerText = 'Red Won';
-            playButton.classList.add('win-one');
-        } else if (winner == 'yellow') {
-            playButton.innerText = 'Yellow Won';
-            playButton.classList.add('win-two');
-        } else {
-            playButton.innerText = 'Play';
-            playButton.classList.add('active');
-        }
-    }
-
-    if (!isPlaying) return;
-    if (endStateReached()) {
-        isPlaying = false;
+canvas.addEventListener('mousemove', event => {
+    // ensure next move's agent is human
+    if (!isPlaying || agentSelect[moves.length & 1].value != 'human') {
+        nextMove = -1;
         return;
     }
+    // get column index from mouse pointer location
+    const rect = canvas.getBoundingClientRect();
+    nextMove = Math.floor((event.clientX - rect.left) / cellWidth);
+});
 
-    const agent = agentSelect[moves.length & 1].value;
-    const depth = Number(depthSelect[moves.length & 1].value);
+canvas.addEventListener('click', event => {
+    if (!isPlaying) return;
+    // get column index from click location
+    const rect = canvas.getBoundingClientRect();
+    humanMove = Math.floor((event.clientX - rect.left) / cellWidth);
+});
 
-    if (agent == 'minimax') {
-        const startTime = performance.now();
-        const move = getMinimaxMove(depth);
-        const endTime = performance.now();
+function makeMove(icol) {
+    // ensure the move is valid
+    if (!isPlaying || heights[icol] >= nrows) return;
 
-        makeMove(move);
-
-        evaluations.push(getEvaluations());
-        elapsedTime.push(endTime - startTime);
-
-        updateStats();
-    } else if (agent == 'human' && humanMove != -1) {
-        makeMove(humanMove);
-        humanMove = -1;
-    }
+    moves.push(icol);
+    heights[icol]++;
 }
 
 function clearStats() {
@@ -394,8 +257,112 @@ function updateStats() {
     }
 }
 
+// request the first frame
+window.requestAnimationFrame(gameLoop);
+function gameLoop(timeStamp) {
+    update();
+    draw();
+
+    // request the next frame
+    window.requestAnimationFrame(gameLoop);
+}
+
+function update() {
+    if (moves.length == 0) {
+        backButton.setAttribute('disabled', true);
+        resetButton.setAttribute('disabled', true);
+    } else {
+        backButton.removeAttribute('disabled');
+        resetButton.removeAttribute('disabled');
+    }
+
+    playButton.classList.remove('active');
+    playButton.classList.remove('win-two');
+    playButton.classList.remove('win-one');
+
+    if (isPlaying) {
+        playButton.innerText = (moves.length % 2 == 0) ? 'Red\'s Turn' : 'Yellow\'s Turn';
+    } else {
+        const winner = getWinner();
+
+        if (winner == 'tie') {
+            playButton.innerText = 'It\'s a Tie';
+        } else if (winner == 'red') {
+            playButton.innerText = 'Red Won';
+            playButton.classList.add('win-one');
+        } else if (winner == 'yellow') {
+            playButton.innerText = 'Yellow Won';
+            playButton.classList.add('win-two');
+        } else {
+            playButton.innerText = 'Play';
+            playButton.classList.add('active');
+        }
+    }
+
+    if (!isPlaying) return;
+    if (getWinner() != 'none') {
+        isPlaying = false;
+        return;
+    }
+
+    const agent = agentSelect[moves.length & 1].value;
+    const depth = Number(depthSelect[moves.length & 1].value);
+
+    if (agent == 'minimax') {
+        const startTime = performance.now();
+        const move = getMinimaxMove(depth);
+        const endTime = performance.now();
+
+        makeMove(move);
+
+        evaluations.push(getEvaluations());
+        elapsedTime.push(endTime - startTime);
+
+        updateStats();
+    } else if (agent == 'human' && humanMove != -1) {
+        makeMove(humanMove);
+        humanMove = -1;
+    }
+}
+
 function draw() {
+    function drawGrid() {
+        ctx.fillStyle = boardFg;
+
+        ctx.fillRect(0, 0, boardWidth, boardHeight);
+        
+        ctx.fillStyle = boardBg;
+        ctx.strokeStyle = boardFg;
+        ctx.lineWidth = lineWidth;
+        
+        for (let irow = 0; irow < nrows; irow++) {
+            const circleY = (irow + 1) * cellHeight - radius + lineWidth/2;
+
+            for (let icol = 0; icol < ncols; icol++) {
+                const circleX = (icol + 1) * cellWidth - radius + lineWidth/2;
+
+                ctx.beginPath();
+                ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+    }
     drawGrid();
+
+    function drawCoin(fillStyle, strokeStyle, irow, icol) {
+        ctx.fillStyle = fillStyle;
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = lineWidth;
+
+        const coinX = (icol + 1) * cellWidth - radius + lineWidth/2;
+        const coinY = (irow + 1) * cellHeight - radius + lineWidth/2;
+        
+        ctx.beginPath();
+        ctx.arc(coinX, coinY, radius - 2 * lineWidth, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+    }
     
     // highlight next move for non-touch devices
     if (!isTouchDevice() && isPlaying && nextMove != -1 && heights[nextMove] < nrows) {
@@ -415,21 +382,33 @@ function draw() {
     for (let counter = 0; counter < moves.length; counter++) {
         const icol = moves[counter];
         const irow = nrows - hcols[icol] - 1;
-        
-        board[irow][icol] = (counter & 1); // 0 for Red, 1 for Yellow
 
         // draw coins on grid
-        if (board[irow][icol] == 0) {
+        if ((counter % 2) == 0) {
             drawCoin(coinRed, coinRedBorder, irow, icol);
-        } else if (board[irow][icol] == 1) {
+        } else {
             drawCoin(coinYellow, coinYellowBorder, irow, icol);
         }
 
+        board[irow][icol] = (counter % 2); // 0 for Red, 1 for Yellow
         hcols[icol]++;
     }
 
     // indicate winning token
-    if (!isPlaying && moves.length > 0) {
+    function drawToken(irow, icol) {
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = lineWidth * 2;
+
+        const coinX = (icol + 1) * cellWidth - radius + lineWidth/2;
+        const coinY = (irow + 1) * cellHeight - radius + lineWidth/2;
+
+        ctx.beginPath();
+        ctx.arc(coinX, coinY, cellWidth/4, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+
+    const winner = getWinner();
+    if (winner == 'red' || winner == 'yellow') {
         // horizontal
         for (let irow = 0; irow < nrows; irow++) {
             for (let icol = 0; icol < ncols - 3; icol++) {
@@ -438,10 +417,10 @@ function draw() {
                     (board[irow][icol] == board[irow][icol + 2]) &&
                     (board[irow][icol] == board[irow][icol + 3])
                 ) {
-                    drawWinToken(irow, icol);
-                    drawWinToken(irow, icol + 1);
-                    drawWinToken(irow, icol + 2);
-                    drawWinToken(irow, icol + 3);
+                    drawToken(irow, icol);
+                    drawToken(irow, icol + 1);
+                    drawToken(irow, icol + 2);
+                    drawToken(irow, icol + 3);
                 }
             }
         }
@@ -453,10 +432,10 @@ function draw() {
                     (board[irow][icol] == board[irow + 2][icol]) &&
                     (board[irow][icol] == board[irow + 3][icol])
                 ) {
-                    drawWinToken(irow, icol);
-                    drawWinToken(irow + 1, icol);
-                    drawWinToken(irow + 2, icol);
-                    drawWinToken(irow + 3, icol);
+                    drawToken(irow, icol);
+                    drawToken(irow + 1, icol);
+                    drawToken(irow + 2, icol);
+                    drawToken(irow + 3, icol);
                 }
             }
         }
@@ -468,10 +447,10 @@ function draw() {
                     (board[irow][icol] == board[irow + 2][icol - 2]) &&
                     (board[irow][icol] == board[irow + 3][icol - 3])
                 ) {
-                    drawWinToken(irow, icol);
-                    drawWinToken(irow + 1, icol - 1);
-                    drawWinToken(irow + 2, icol - 2);
-                    drawWinToken(irow + 3, icol - 3);
+                    drawToken(irow, icol);
+                    drawToken(irow + 1, icol - 1);
+                    drawToken(irow + 2, icol - 2);
+                    drawToken(irow + 3, icol - 3);
                 }
             }
         }
@@ -483,10 +462,10 @@ function draw() {
                     (board[irow][icol] == board[irow + 2][icol + 2]) &&
                     (board[irow][icol] == board[irow + 3][icol + 3])
                 ) {
-                    drawWinToken(irow, icol);
-                    drawWinToken(irow + 1, icol + 1);
-                    drawWinToken(irow + 2, icol + 2);
-                    drawWinToken(irow + 3, icol + 3);
+                    drawToken(irow, icol);
+                    drawToken(irow + 1, icol + 1);
+                    drawToken(irow + 2, icol + 2);
+                    drawToken(irow + 3, icol + 3);
                 }
             }
         }
