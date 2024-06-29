@@ -23,6 +23,8 @@ body {
 canvas {
     display: block;
     margin: 0.5em auto;
+    width: min(630px, 100vw);
+    aspect-ratio: 7/6;
 }
 
 section {
