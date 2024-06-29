@@ -243,6 +243,8 @@ function endStateReached() {
 }
 
 function getWinner() {
+    if (moves.length == 0) return 'none';
+
     const array = new Int32Array(memory.buffer, 0, moves.length);
     array.set(moves);
 
@@ -295,35 +297,26 @@ function update() {
         resetButton.removeAttribute('disabled');
     }
 
+    playButton.classList.remove('active');
+    playButton.classList.remove('win-two');
+    playButton.classList.remove('win-one');
+
     if (isPlaying) {
-        playButton.classList.remove('active');
-        playButton.classList.remove('win-two');
-        playButton.classList.remove('win-one');
-
-        playButton.innerText = (moves.length % 2 == 0) ? "Red's Turn" : "Yellow's Turn";
+        playButton.innerText = (moves.length % 2 == 0) ? 'Red\'s Turn' : 'Yellow\'s Turn';
     } else {
-        playButton.classList.add('active');
-        playButton.classList.remove('win-two');
-        playButton.classList.remove('win-one');
+        const winner = getWinner();
 
-        playButton.innerText = "Play";
-
-        if (moves.length > 0) {
-            const winner = getWinner();
-
-            if (winner == 'tie') {
-                playButton.innerText = "It's a Tie";
-            } else if (winner == 'red') {
-                playButton.innerText = 'Red Won';
-                playButton.classList.remove('active');
-                playButton.classList.remove('win-two');
-                playButton.classList.add('win-one');
-            } else if (winner == 'yellow') {
-                playButton.innerText = 'Yellow Won';
-                playButton.classList.remove('active');
-                playButton.classList.remove('win-one');
-                playButton.classList.add('win-two');
-            }
+        if (winner == 'tie') {
+            playButton.innerText = 'It\'s a Tie';
+        } else if (winner == 'red') {
+            playButton.innerText = 'Red Won';
+            playButton.classList.add('win-one');
+        } else if (winner == 'yellow') {
+            playButton.innerText = 'Yellow Won';
+            playButton.classList.add('win-two');
+        } else {
+            playButton.innerText = 'Play';
+            playButton.classList.add('active');
         }
     }
 
